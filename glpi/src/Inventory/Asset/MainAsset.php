@@ -193,40 +193,38 @@ abstract class MainAsset extends InventoryAsset
         }
 
         // * Type of the asset
-        if (isset($hardware)) {
-            $types_id = $this->getTypesFieldName();
-            if (
-                property_exists($hardware, 'vmsystem')
-                && $hardware->vmsystem != ''
-                && $hardware->vmsystem != 'Physical'
-            ) {
-                $val->$types_id = $hardware->vmsystem;
-                // HACK FOR BSDJail, remove serial and UUID (because it's of host, not container)
-                if ($hardware->vmsystem == 'BSDJail') {
-                    if (property_exists($val, 'serial')) {
-                        $val->serial = '';
-                    }
-                    $val->uuid .= '-' . $val->name;
+        $types_id = $this->getTypesFieldName();
+        if (
+            property_exists($hardware, 'vmsystem')
+            && $hardware->vmsystem != ''
+            && $hardware->vmsystem != 'Physical'
+        ) {
+            $val->$types_id = $hardware->vmsystem;
+            // HACK FOR BSDJail, remove serial and UUID (because it's of host, not container)
+            if ($hardware->vmsystem == 'BSDJail') {
+                if (property_exists($val, 'serial')) {
+                    $val->serial = '';
                 }
-            } else {
-                if (array_key_exists('bios', $this->extra_data)) {
-                    $bios = (object)$this->extra_data['bios'];
-                    if (
-                        property_exists($hardware, 'chassis_type')
-                        && !empty($hardware->chassis_type)
-                    ) {
-                        $val->$types_id = $hardware->chassis_type;
-                    } else if (
-                        isset($bios) && property_exists($bios, 'type')
-                        && !empty($bios->type)
-                    ) {
-                        $val->$types_id = $bios->type;
-                    } else if (
-                        isset($bios) && property_exists($bios, 'mmodel')
-                        && !empty($bios->mmodel)
-                    ) {
-                        $val->$types_id = $bios->mmodel;
-                    }
+                $val->uuid .= '-' . $val->name;
+            }
+        } else {
+            if (array_key_exists('bios', $this->extra_data)) {
+                $bios = (object)$this->extra_data['bios'];
+                if (
+                    property_exists($hardware, 'chassis_type')
+                    && !empty($hardware->chassis_type)
+                ) {
+                    $val->$types_id = $hardware->chassis_type;
+                } else if (
+                    property_exists($bios, 'type')
+                    && !empty($bios->type)
+                ) {
+                    $val->$types_id = $bios->type;
+                } else if (
+                    property_exists($bios, 'mmodel')
+                    && !empty($bios->mmodel)
+                ) {
+                    $val->$types_id = $bios->mmodel;
                 }
             }
         }
@@ -258,7 +256,7 @@ abstract class MainAsset extends InventoryAsset
                     'SELECT' => 'id',
                     'FROM'   => 'glpi_users',
                     'WHERE'  => [
-                        'name'   => $split_user[0]
+                        'name'   => Sanitizer::sanitize($split_user[0])
                     ],
                     'LIMIT'  => 1
                 ]);
@@ -303,7 +301,7 @@ abstract class MainAsset extends InventoryAsset
                         ) {
                             $ldaps = $DB->request(
                                 'glpi_authldaps',
-                                ['WHERE'  => ['inventory_domain' => $a_users->domain]]
+                                ['WHERE'  => ['inventory_domain' => Sanitizer::sanitize($a_users->domain)]]
                             );
                              $ldaps_ids = [];
                             foreach ($ldaps as $data_LDAP) {
@@ -318,7 +316,7 @@ abstract class MainAsset extends InventoryAsset
                             'SELECT' => ['id'],
                             'FROM'   => 'glpi_users',
                             'WHERE'  => [
-                                'name'   => $a_users->login
+                                'name'   => Sanitizer::sanitize($a_users->login)
                             ] + $where_add,
                             'LIMIT'  => 1
                         ]);
@@ -534,7 +532,7 @@ abstract class MainAsset extends InventoryAsset
                 $dataEntity = $ruleEntity->processAllRules($entity_input, []);
 
                 if (isset($dataEntity['_ignore_import'])) {
-                    $input['rules_id'] = $dataEntity['rules_id'];
+                    $input['rules_id'] = $dataEntity['_ruleid'];
                     $this->addRefused($input);
                     return;
                 }
@@ -648,7 +646,7 @@ abstract class MainAsset extends InventoryAsset
      */
     public function rulepassed($items_id, $itemtype, $rules_id, $ports_id = 0)
     {
-        global $CFG_GLPI;
+        global $CFG_GLPI, $DB;
 
         $key = $this->current_key;
         $val = &$this->data[$key];
@@ -710,7 +708,17 @@ abstract class MainAsset extends InventoryAsset
         //handle domains
         if (property_exists($val, 'domains_id')) {
             $domain = new \Domain();
-            if (!$domain->getFromDBByCrit(Sanitizer::sanitize(['name' => $val->domains_id]))) {
+            $matching_domains = $DB->request([
+                'FROM' => $domain->getTable(),
+                'WHERE' => [
+                    'name' => Sanitizer::sanitize($val->domains_id),
+                    'is_deleted' => 0,
+                ] + getEntitiesRestrictCriteria($domain->getTable(), '', $entities_id, true),
+                'LIMIT' => 1, // Get the first domain, as we assume that a domain should not be declared multiple times in the same entity scope
+            ]);
+            if ($matching_domains->count() > 0) {
+                $domain->getFromResultSet($matching_domains->current());
+            } else {
                 $domain->add(
                     Sanitizer::sanitize([
                         'name' => $val->domains_id,
@@ -726,11 +734,10 @@ abstract class MainAsset extends InventoryAsset
             $criteria = [
                 'domains_id' => $domain->getID(),
                 'itemtype' => $itemtype,
-                'items_id' => $items_id,
-                'domainrelations_id' => \DomainRelation::BELONGS
+                'items_id' => $items_id
             ];
             if (!$ditem->getFromDBByCrit($criteria)) {
-                $ditem->add($criteria + ['is_dynamic' => 1], [], false);
+                $ditem->add($criteria + ['domainrelations_id' => \DomainRelation::BELONGS, 'is_dynamic' => 1], [], false);
             }
 
             //cleanup old dynamic relations
@@ -916,6 +923,11 @@ abstract class MainAsset extends InventoryAsset
             foreach ($assets as $asset) {
                 $asset->setEntityID($this->getEntityID());
                 $asset->setExtraData($this->assets);
+                foreach ($this->assets as $asset_type => $asset_list) {
+                    if ($asset_type != '\\' . get_class($asset)) {
+                        $asset->setExtraData([$asset_type => $asset_list]);
+                    }
+                }
                 $asset->setExtraData(['\\' . get_class($this) => $mainasset]);
                 $asset->handleLinks();
                 $asset->handle();

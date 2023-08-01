@@ -48,6 +48,8 @@ class Cartridge extends CommonDBRelation
     public $dohistory                   = true;
     public $no_form_page                = true;
 
+    public static $rightname = 'cartridge';
+
     public static $itemtype_1 = 'CartridgeItem';
     public static $items_id_1 = 'cartridgeitems_id';
 
@@ -771,9 +773,9 @@ class Cartridge extends CommonDBRelation
 
         $number = count($iterator);
 
+        $rand = mt_rand();
         echo "<div class='spaced'>";
         if ($canedit && $number) {
-            $rand = mt_rand();
             Html::openMassiveActionsForm('mass' . __CLASS__ . $rand);
             $actions = ['purge' => _x('button', 'Delete permanently'),
                 'Infocom' . MassiveAction::CLASS_ACTION_SEPARATOR . 'activate'

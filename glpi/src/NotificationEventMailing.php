@@ -131,22 +131,40 @@ class NotificationEventMailing extends NotificationEventAbstract
                     }
                 }
 
-                // Add custom header for mail grouping in reader
-                $mmail->AddCustomHeader(
-                    str_replace(
-                        [
-                            '%uuid',
-                            '%itemtype',
-                            '%items_id'
-                        ],
-                        [
-                            Config::getUuid('notification'),
+                if ($current->fields['event'] === null) {
+                    // Notifications that were pushed in queue before upgrade to GLPI 10.0.8+ have a `null` value in `event` field.
+                    // Build the `In-Reply-To` header as it was done before GLPI 10.0.8.
+                    $mmail->AddCustomHeader(
+                        str_replace(
+                            [
+                                '%uuid',
+                                '%itemtype',
+                                '%items_id'
+                            ],
+                            [
+                                Config::getUuid('notification'),
+                                $current->fields['itemtype'],
+                                $current->fields['items_id']
+                            ],
+                            "In-Reply-To: <GLPI-%uuid-%itemtype-%items_id>"
+                        )
+                    );
+                } elseif (is_a($current->fields['itemtype'], CommonDBTM::class, true)) {
+                    $reference_event = $current->fields['itemtype']::getMessageReferenceEvent($current->fields['event']);
+                    if ($reference_event !== null && $reference_event !== $current->fields['event']) {
+                        // Add `In-Reply-To` and `References` for mail grouping in reader when:
+                        // - there is a reference event (i.e. we want to add current notification to a thread)
+                        // - event is not the reference event (i.e. the thread has already be initiated).
+                        // see https://datatracker.ietf.org/doc/html/rfc2822#section-3.6.4
+                        $email_ref = NotificationTarget::getMessageIdForEvent(
                             $current->fields['itemtype'],
-                            $current->fields['items_id']
-                        ],
-                        "In-Reply-To: <GLPI-%uuid-%itemtype-%items_id>"
-                    )
-                );
+                            $current->fields['items_id'],
+                            $reference_event
+                        );
+                        $mmail->AddCustomHeader("In-Reply-To: <{$email_ref}>");
+                        $mmail->AddCustomHeader("References: <{$email_ref}>");
+                    }
+                }
 
                 $mmail->SetFrom($current->fields['sender'], $current->fields['sendername']);
 
@@ -206,9 +224,12 @@ class NotificationEventMailing extends NotificationEventAbstract
                 } else {
                     $mmail->Body = '';
                     $inline_docs = [];
-                    $doc = new Document();
                     foreach ($documents_ids as $document_id) {
-                        $doc->getFromDB($document_id);
+                        $doc = new Document();
+                        if ($doc->getFromDB($document_id) === false) {
+                            trigger_error(sprintf('Unable to load document %d.', $document_id), E_USER_WARNING);
+                            continue;
+                        }
                         // Add embeded image if tag present in ticket content
                         if (
                             preg_match_all(
@@ -255,58 +276,72 @@ class NotificationEventMailing extends NotificationEventAbstract
                     ) {
                         if (isset($matches[2])) {
                             foreach ($matches[2] as $pos => $docID) {
-                                if (!in_array($docID, $inline_docs)) {
-                                    $doc->getFromDB($docID);
+                                if (in_array($docID, $inline_docs)) {
+                                    // Already in mapping
+                                    continue;
+                                }
 
-                                    //find width
-                                    $custom_width = null;
-                                    if (preg_match("/width=[\"|'](\d+)(\.\d+)?[\"|']/", $matches[0][$pos], $wmatches)) {
-                                        $custom_width = intval($wmatches[1]);
-                                    }
-                                    $custom_height = null;
-                                    if (preg_match("/height=[\"|'](\d+)(\.\d+)?[\"|']/", $matches[0][$pos], $hmatches)) {
-                                        $custom_height = intval($hmatches[1]);
-                                    }
+                                $doc = new Document();
+                                if ($doc->getFromDB($docID) === false) {
+                                    $inline_docs[$docID] = 'notfound'; // Add mapping entry to ensure that src is converted to an absolute URL
+                                    trigger_error(sprintf('Unable to load document %d.', $docID), E_USER_WARNING);
+                                    continue;
+                                }
 
-                                    // Make sure file still exists
-                                    if (!file_exists(GLPI_DOC_DIR . "/" . $doc->fields['filepath'])) {
-                                        trigger_error('Failed to add document ' . $doc->fields['filepath'] . ' to mail: file not found', E_USER_WARNING);
-                                        continue;
-                                    }
+                                //find width
+                                $custom_width = null;
+                                if (preg_match("/width=[\"|'](\d+)(\.\d+)?[\"|']/", $matches[0][$pos], $wmatches)) {
+                                    $custom_width = intval($wmatches[1]);
+                                }
+                                $custom_height = null;
+                                if (preg_match("/height=[\"|'](\d+)(\.\d+)?[\"|']/", $matches[0][$pos], $hmatches)) {
+                                    $custom_height = intval($hmatches[1]);
+                                }
 
-                                    $img_infos = getimagesize(GLPI_DOC_DIR . "/" . $doc->fields['filepath']);
-                                    $initial_width = $img_infos[0];
-                                    $initial_height = $img_infos[1];
+                                // Make sure file still exists
+                                if (!file_exists(GLPI_DOC_DIR . "/" . $doc->fields['filepath'])) {
+                                    trigger_error('Failed to add document ' . $doc->fields['filepath'] . ' to mail: file not found', E_USER_WARNING);
+                                    continue;
+                                }
 
-                                    if ($custom_width !== null && $custom_height === null) {
-                                        //compute height if needed
-                                        $custom_height = $initial_height * $custom_width / $initial_width;
-                                    } elseif ($custom_height !== null && $custom_width === null) {
-                                        //compute width if needed
-                                        $custom_width = $initial_width * $custom_height / $initial_height;
-                                    } elseif ($custom_height === null && $custom_width === null) {
-                                        //if both are null keep initial size
-                                        $custom_width = $initial_width;
-                                        $custom_height = $initial_height;
-                                    }
+                                $img_infos = getimagesize(GLPI_DOC_DIR . "/" . $doc->fields['filepath']);
 
-                                    $image_path = Document::getImage(
-                                        GLPI_DOC_DIR . "/" . $doc->fields['filepath'],
-                                        'mail',
-                                        $custom_width,
-                                        $custom_height
-                                    );
-                                    if (
-                                        $mmail->AddEmbeddedImage(
-                                            $image_path,
-                                            $doc->fields['tag'],
-                                            $doc->fields['filename'],
-                                            'base64',
-                                            $doc->fields['mime']
-                                        )
-                                    ) {
-                                        $inline_docs[$docID] = $doc->fields['tag'];
-                                    }
+                                if (!$img_infos) {
+                                    // Failure to read image size, skip to avoid a divide by zero exception
+                                    continue;
+                                }
+
+                                $initial_width = $img_infos[0];
+                                $initial_height = $img_infos[1];
+
+                                if ($custom_width !== null && $custom_height === null) {
+                                    //compute height if needed
+                                    $custom_height = $initial_height * $custom_width / $initial_width;
+                                } elseif ($custom_height !== null && $custom_width === null) {
+                                    //compute width if needed
+                                    $custom_width = $initial_width * $custom_height / $initial_height;
+                                } elseif ($custom_height === null && $custom_width === null) {
+                                    //if both are null keep initial size
+                                    $custom_width = $initial_width;
+                                    $custom_height = $initial_height;
+                                }
+
+                                $image_path = Document::getImage(
+                                    GLPI_DOC_DIR . "/" . $doc->fields['filepath'],
+                                    'mail',
+                                    $custom_width,
+                                    $custom_height
+                                );
+                                if (
+                                    $mmail->AddEmbeddedImage(
+                                        $image_path,
+                                        $doc->fields['tag'],
+                                        $doc->fields['filename'],
+                                        'base64',
+                                        $doc->fields['mime']
+                                    )
+                                ) {
+                                    $inline_docs[$docID] = $doc->fields['tag'];
                                 }
                             }
                         }
@@ -349,7 +384,7 @@ class NotificationEventMailing extends NotificationEventAbstract
                 if (!empty($current->fields['messageid'])) {
                     $mmail->MessageID = "<" . $current->fields['messageid'] . ">";
                 }
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 self::handleFailedSend($current, $e->getMessage());
             }
 
@@ -453,7 +488,10 @@ class NotificationEventMailing extends NotificationEventAbstract
 
         $document = new Document();
         foreach ($documents_ids as $document_id) {
-            $document->getFromDB($document_id);
+            if ($document->getFromDB($document_id) === false) {
+                trigger_error(sprintf('Unable to load document %d.', $document_id), E_USER_WARNING);
+                continue;
+            }
             $path = GLPI_DOC_DIR . "/" . $document->fields['filepath'];
             if (Document::isImage($path)) {
                 $path = Document::getImage(

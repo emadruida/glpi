@@ -1,4 +1,6 @@
-/*!
+<?php
+
+/**
  * ---------------------------------------------------------------------
  *
  * GLPI - Gestionnaire Libre de Parc Informatique
@@ -31,12 +33,43 @@
  * ---------------------------------------------------------------------
  */
 
-.debug-panel {
-    font-size: $font-size-sm;
-    z-index: 9999;
-    display: none;
+/**
+ * @var DB $DB
+ * @var Migration $migration
+ */
 
-    .card-body {
-        height: 300px;
+foreach (['glpi_computervirtualmachines', 'glpi_networkequipments'] as $table) {
+    // field has to be nullable to be able to set empty values to null
+    $migration->changeField(
+        $table,
+        'ram',
+        'ram',
+        'varchar(255) DEFAULT NULL',
+    );
+    $migration->migrationOneTable($table);
+
+    $DB->updateOrDie(
+        $table,
+        ['ram' => null],
+        ['ram' => '']
+    );
+    $iterator = $DB->request([
+        'FROM'  => $table,
+        'WHERE' => [
+            'ram' => ['REGEXP', '[^0-9]+'],
+        ],
+    ]);
+    foreach ($iterator as $row) {
+        $DB->updateOrDie(
+            $table,
+            ['ram' => preg_replace('/[^0-9]+/', '', $row['ram'])],
+            ['id'  => $row['id']]
+        );
     }
+    $migration->changeField(
+        $table,
+        'ram',
+        'ram',
+        'int unsigned DEFAULT NULL',
+    );
 }

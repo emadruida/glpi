@@ -1642,7 +1642,19 @@ class Search
                             $handled = false;
                             if ($fieldname != 'content' && is_string($val) && strpos($val, self::SHORTSEP) !== false) {
                                 $split2                    = self::explodeWithID(self::SHORTSEP, $val);
-                                if (is_numeric($split2[1])) {
+                                if ($j == "User_80") {
+                                    $newrow[$j][0][$fieldname] = $split2[0];
+                                    $newrow[$j][0]["profiles_id"] = $split2[1];
+                                    $newrow[$j][0]["is_recursive"] = $split2[2];
+                                    $newrow[$j][0]["is_dynamic"] = $split2[3];
+                                    $handled = true;
+                                } elseif ($j == "User_20") {
+                                    $newrow[$j][0][$fieldname] = $split2[0];
+                                    $newrow[$j][0]["entities_id"] = $split2[1];
+                                    $newrow[$j][0]["is_recursive"] = $split2[2];
+                                    $newrow[$j][0]["is_dynamic"] = $split2[3];
+                                    $handled = true;
+                                } elseif (is_numeric($split2[1])) {
                                     $newrow[$j][0][$fieldname] = $split2[0];
                                     $newrow[$j][0]['id']       = $split2[1];
                                     $handled = true;
@@ -1666,7 +1678,19 @@ class Search
                                 $handled = false;
                                 if (strpos($val2, self::SHORTSEP) !== false) {
                                     $split2                  = self::explodeWithID(self::SHORTSEP, $val2);
-                                    if (is_numeric($split2[1])) {
+                                    if ($j == "User_80") {
+                                        $newrow[$j][$key2][$fieldname] = $split2[0];
+                                        $newrow[$j][$key2]["profiles_id"] = $split2[1];
+                                        $newrow[$j][$key2]["is_recursive"] = $split2[2];
+                                        $newrow[$j][$key2]["is_dynamic"] = $split2[3];
+                                        $handled = true;
+                                    } elseif ($j == "User_20") {
+                                        $newrow[$j][$key2][$fieldname] = $split2[0];
+                                        $newrow[$j][$key2]["entities_id"] = $split2[1];
+                                        $newrow[$j][$key2]["is_recursive"] = $split2[2];
+                                        $newrow[$j][$key2]["is_dynamic"] = $split2[3];
+                                        $handled = true;
+                                    } elseif (is_numeric($split2[1])) {
                                         $newrow[$j][$key2]['id'] = $split2[1];
                                         if ($split2[0] == self::NULLVALUE) {
                                             $newrow[$j][$key2][$fieldname] = null;
@@ -2764,7 +2788,7 @@ JAVASCRIPT;
         $normalized_itemtype = strtolower(str_replace('\\', '', $request["itemtype"]));
         $rowid       = 'searchrow' . $normalized_itemtype . $randrow;
         $addclass    = $num == 0 ? ' headerRow' : '';
-        $prefix      = isset($p['prefix_crit']) ? $p['prefix_crit'] : '';
+        $prefix      = isset($p['prefix_crit']) ? htmlspecialchars($p['prefix_crit'], ENT_QUOTES) : '';
         $parents_num = isset($p['parents_num']) ? $p['parents_num'] : [];
         $criteria    = [];
         $from_meta   = isset($request['from_meta']) && $request['from_meta'];
@@ -2962,7 +2986,7 @@ JAVASCRIPT;
 
         $p            = $request['p'];
         $num          = (int) $request['num'];
-        $prefix       = isset($p['prefix_crit']) ? $p['prefix_crit'] : '';
+        $prefix       = isset($p['prefix_crit']) ? htmlspecialchars($p['prefix_crit'], ENT_QUOTES) : '';
         $parents_num  = isset($p['parents_num']) ? $p['parents_num'] : [];
         $itemtype     = $request["itemtype"];
         $metacriteria = [];
@@ -3074,7 +3098,7 @@ JAVASCRIPT;
         $randrow     = mt_rand();
         $rowid       = 'searchrow' . $request['itemtype'] . $randrow;
         $addclass    = $num == 0 ? ' headerRow' : '';
-        $prefix      = isset($p['prefix_crit']) ? $p['prefix_crit'] : '';
+        $prefix      = isset($p['prefix_crit']) ? htmlspecialchars($p['prefix_crit'], ENT_QUOTES) : '';
         $parents_num = isset($p['parents_num']) ? $p['parents_num'] : [];
 
         if (!$criteria = self::findCriteriaInSession($request['itemtype'], $num, $parents_num)) {
@@ -3219,7 +3243,7 @@ JAVASCRIPT;
 
         $p      = $request['p'];
         $num    = (int) $request['num'];
-        $prefix = isset($p['prefix_crit']) ? $p['prefix_crit'] : '';
+        $prefix = isset($p['prefix_crit']) ? htmlentities($p['prefix_crit'], ENT_QUOTES) : '';
 
         if (!is_subclass_of($request['itemtype'], 'CommonDBTM')) {
             throw new \RuntimeException('Invalid itemtype provided!');
@@ -3318,7 +3342,7 @@ JAVASCRIPT;
         }
 
         $p                 = $request['p'];
-        $prefix            = isset($p['prefix_crit']) ? $p['prefix_crit'] : '';
+        $prefix            = isset($p['prefix_crit']) ? htmlspecialchars($p['prefix_crit'], ENT_QUOTES) : '';
         $searchopt         = isset($request['searchopt']) ? $request['searchopt'] : [];
         $request['value']  = rawurldecode($request['value']);
         $fieldname         = isset($request['meta']) && $request['meta']
@@ -4013,14 +4037,13 @@ JAVASCRIPT;
                     if ($meta) {
                         $addtable2 = "_" . $meta_type;
                     }
-                    return " GROUP_CONCAT(`$table$addtable`.`$field` SEPARATOR '" . self::LONGSEP . "') AS `" . $NAME . "`,
-                        GROUP_CONCAT(`glpi_profiles_users$addtable2`.`entities_id` SEPARATOR '" . self::LONGSEP . "')
-                                    AS `" . $NAME . "_entities_id`,
-                        GROUP_CONCAT(`glpi_profiles_users$addtable2`.`is_recursive` SEPARATOR '" . self::LONGSEP . "')
-                                    AS `" . $NAME . "_is_recursive`,
-                        GROUP_CONCAT(`glpi_profiles_users$addtable2`.`is_dynamic` SEPARATOR '" . self::LONGSEP . "')
-                                    AS `" . $NAME . "_is_dynamic`,
-                        $ADDITONALFIELDS";
+                    return " GROUP_CONCAT(
+                        DISTINCT CONCAT(
+                                `$table$addtable` . `$field`, '" . self::SHORTSEP .
+                                "', `glpi_profiles_users$addtable2`.`entities_id`, '" . self::SHORTSEP .
+                                "', `glpi_profiles_users$addtable2`.`is_recursive`, '" . self::SHORTSEP .
+                                "', `glpi_profiles_users$addtable2`.`is_dynamic`) SEPARATOR '" . self::LONGSEP .
+                        "' ) AS `" . $NAME . "`, $ADDITONALFIELDS";
                 }
                 break;
 
@@ -4033,15 +4056,13 @@ JAVASCRIPT;
                     if ($meta) {
                         $addtable2 = "_" . $meta_type;
                     }
-                    return " GROUP_CONCAT(`$table$addtable`.`completename` SEPARATOR '" . self::LONGSEP . "')
-                                    AS `" . $NAME . "`,
-                        GROUP_CONCAT(`glpi_profiles_users$addtable2`.`profiles_id` SEPARATOR '" . self::LONGSEP . "')
-                                    AS `" . $NAME . "_profiles_id`,
-                        GROUP_CONCAT(`glpi_profiles_users$addtable2`.`is_recursive` SEPARATOR '" . self::LONGSEP . "')
-                                    AS `" . $NAME . "_is_recursive`,
-                        GROUP_CONCAT(`glpi_profiles_users$addtable2`.`is_dynamic` SEPARATOR '" . self::LONGSEP . "')
-                                    AS `" . $NAME . "_is_dynamic`,
-                        $ADDITONALFIELDS";
+                    return " GROUP_CONCAT(
+                        DISTINCT CONCAT(
+                                `$table$addtable` . `completename`, '" . self::SHORTSEP .
+                                "', `glpi_profiles_users$addtable2`.`profiles_id`, '" . self::SHORTSEP .
+                                "', `glpi_profiles_users$addtable2`.`is_recursive`, '" . self::SHORTSEP .
+                                "', `glpi_profiles_users$addtable2`.`is_dynamic`) SEPARATOR '" . self::LONGSEP .
+                        "' ) AS `" . $NAME . "`, $ADDITONALFIELDS";
                 }
                 break;
 
@@ -4644,6 +4665,8 @@ JAVASCRIPT;
 
         // Special case when searching for an user (need to compare with login, firstname, ...)
         $subquery_specific_username = false;
+        $subquery_specific_username_firstname_real_name = '';
+        $subquery_specific_username_anonymous = '';
 
         // The subquery operator will be "IN" or "NOT IN" depending on the context and criteria
         $subquery_operator = "";
@@ -6557,7 +6580,6 @@ JAVASCRIPT;
             $linkfield = $so["linkfield"];
 
            /// TODO try to clean all specific cases using SpecificToDisplay
-
             switch ($table . '.' . $field) {
                 case "glpi_users.name":
                     // USER search case
@@ -6687,7 +6709,8 @@ JAVASCRIPT;
                         $added         = [];
                         for ($k = 0; $k < $data[$ID]['count']; $k++) {
                             if (
-                                strlen(trim($data[$ID][$k]['name'])) > 0
+                                isset($data[$ID][$k]['name'])
+                                && strlen(trim($data[$ID][$k]['name'])) > 0
                                 && !in_array(
                                     $data[$ID][$k]['name'] . "-" . $data[$ID][$k]['entities_id'],
                                     $added
@@ -6770,11 +6793,35 @@ JAVASCRIPT;
                             }
                         }
                         return $out;
-                    } else if (($so["datatype"] ?? "") != "itemlink" && !empty($data[$ID][0]['name'])) {
-                        return Entity::badgeCompletename($data[$ID][0]['name']);
+                    } elseif (($so["datatype"] ?? "") != "itemlink" && !empty($data[$ID][0]['name'])) {
+                        $completename = $data[$ID][0]['name'];
+                        if ($html_output) {
+                            if (!$_SESSION['glpiuse_flat_dropdowntree_on_search_result']) {
+                                $split_name = explode(">", $completename);
+                                $entity_name = trim(end($split_name));
+                                return Entity::badgeCompletename($entity_name, CommonTreeDropdown::sanitizeSeparatorInCompletename($completename));
+                            }
+                            return Entity::badgeCompletename($completename);
+                        } else { //export
+                            if (!$_SESSION['glpiuse_flat_dropdowntree_on_search_result']) {
+                                $split_name = explode(">", $completename);
+                                $entity_name = trim(end($split_name));
+                                return $entity_name;
+                            }
+                            return Entity::sanitizeSeparatorInCompletename($completename);
+                        }
                     }
                     break;
-
+                case $table . ".completename":
+                    if (
+                        $itemtype != getItemTypeForTable($table)
+                        && $data[$ID][0]['name'] != null //column have value in DB
+                        && !$_SESSION['glpiuse_flat_dropdowntree_on_search_result'] //user doesn't want the completename
+                    ) {
+                        $split_name = explode(">", $data[$ID][0]['name']);
+                        return trim(end($split_name));
+                    }
+                    break;
                 case "glpi_documenttypes.icon":
                     if (!empty($data[$ID][0]['name'])) {
                         return "<img class='middle' alt='' src='" . $CFG_GLPI["typedoc_icon_dir"] . "/" .
@@ -7433,7 +7480,7 @@ JAVASCRIPT;
 
                             $plaintext = '';
                             if (isset($so['htmltext']) && $so['htmltext']) {
-                                $plaintext = RichText::getTextFromHtml($data[$ID][$k]['name'], false, true, $html_output);
+                                $plaintext = RichText::getTextFromHtml($data[$ID][$k]['name'], false, true, $html_output, false, true);
                             } else {
                                 $plaintext = nl2br($data[$ID][$k]['name']);
                             }
@@ -8210,7 +8257,7 @@ HTML;
                 $plugsearch = Plugin::getAddSearchOptions($itemtype);
                 $plugsearch = $plugsearch + Plugin::getAddSearchOptionsNew($itemtype);
                 if (count($plugsearch)) {
-                    self::$search[$itemtype] += ['plugins' => _n('Plugin', 'Plugins', Session::getPluralNumber())];
+                    self::$search[$itemtype] += ['plugins' => ['name' => _n('Plugin', 'Plugins', Session::getPluralNumber())]];
                     self::$search[$itemtype] += $plugsearch;
                 }
             }
@@ -9088,6 +9135,14 @@ HTML;
         // 1. Unsanitize value to be sure to use raw value.
         // 2. Escape raw value to protect SQL special chars.
         $val = Sanitizer::dbEscape(Sanitizer::unsanitize($val));
+
+        // Backslashes must be doubled in LIKE clause, according to MySQL documentation:
+        // https://dev.mysql.com/doc/refman/8.0/en/string-comparison-functions.html
+        // > To search for \, specify it as \\\\; this is because the backslashes are stripped once by the parser
+        // > and again when the pattern match is made, leaving a single backslash to be matched against.
+        //
+        // At this point, backslashes are already escaped, so escaped backslashes (\\) have to be transformed to \\\\.
+        $val = str_replace('\\\\', '\\\\\\\\', $val);
 
        // escape _ char used as wildcard in mysql likes
         $val = str_replace('_', '\\_', $val);

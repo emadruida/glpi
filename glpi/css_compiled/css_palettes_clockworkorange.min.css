@@ -600,15 +600,15 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 /*!
- * Tabler Icons 2.13.1 by tabler - https://tabler.io
+ * Tabler Icons 2.21.0 by tabler - https://tabler.io
  * License - https://github.com/tabler/tabler-icons/blob/master/LICENSE
  */
 @font-face {
   font-family: "tabler-icons";
   font-style: normal;
   font-weight: 400;
-  src: url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.eot?v2.13.1");
-  src: url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.eot?#iefix-v2.13.1") format("embedded-opentype"), url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.woff2?v2.13.1") format("woff2"), url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.woff?") format("woff"), url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.ttf?v2.13.1") format("truetype");
+  src: url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.eot?v2.21.0");
+  src: url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.eot?#iefix-v2.21.0") format("embedded-opentype"), url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.woff2?v2.21.0") format("woff2"), url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.woff?") format("woff"), url("../css/lib/tabler/icons-webfont/fonts/tabler-icons.ttf?v2.21.0") format("truetype");
 }
 .ti {
   font-family: "tabler-icons" !important;
@@ -844,6 +844,9 @@
 .ti-alert-hexagon:before {
   content: "\f80e";
 }
+.ti-alert-hexagon-filled:before {
+  content: "\fa34";
+}
 .ti-alert-octagon:before {
   content: "\ecc6";
 }
@@ -856,8 +859,14 @@
 .ti-alert-square:before {
   content: "\f811";
 }
+.ti-alert-square-filled:before {
+  content: "\fa35";
+}
 .ti-alert-square-rounded:before {
   content: "\f810";
+}
+.ti-alert-square-rounded-filled:before {
+  content: "\fa36";
 }
 .ti-alert-triangle:before {
   content: "\ea06";
@@ -1062,6 +1071,9 @@
 }
 .ti-archive:before {
   content: "\ea0b";
+}
+.ti-archive-filled:before {
+  content: "\fa82";
 }
 .ti-archive-off:before {
   content: "\f0ad";
@@ -1615,6 +1627,9 @@
 .ti-artboard:before {
   content: "\ea2a";
 }
+.ti-artboard-filled:before {
+  content: "\fa83";
+}
 .ti-artboard-off:before {
   content: "\f0ae";
 }
@@ -1711,6 +1726,9 @@
 .ti-backpack-off:before {
   content: "\f3c2";
 }
+.ti-backslash:before {
+  content: "\fab9";
+}
 .ti-backspace:before {
   content: "\ea2d";
 }
@@ -1804,11 +1822,17 @@
 .ti-balloon:before {
   content: "\ef3a";
 }
+.ti-balloon-filled:before {
+  content: "\fa84";
+}
 .ti-balloon-off:before {
   content: "\f0fd";
 }
 .ti-ballpen:before {
   content: "\f06e";
+}
+.ti-ballpen-filled:before {
+  content: "\fa85";
 }
 .ti-ballpen-off:before {
   content: "\f0b1";
@@ -2134,6 +2158,9 @@
 .ti-bomb:before {
   content: "\f59c";
 }
+.ti-bomb-filled:before {
+  content: "\fa86";
+}
 .ti-bone:before {
   content: "\edb8";
 }
@@ -2155,6 +2182,9 @@
 .ti-book-download:before {
   content: "\f070";
 }
+.ti-book-filled:before {
+  content: "\fa87";
+}
 .ti-book-off:before {
   content: "\f0bc";
 }
@@ -2164,8 +2194,23 @@
 .ti-bookmark:before {
   content: "\ea3a";
 }
+.ti-bookmark-edit:before {
+  content: "\fa5e";
+}
+.ti-bookmark-filled:before {
+  content: "\fa88";
+}
+.ti-bookmark-minus:before {
+  content: "\fa5f";
+}
 .ti-bookmark-off:before {
   content: "\eced";
+}
+.ti-bookmark-plus:before {
+  content: "\fa60";
+}
+.ti-bookmark-question:before {
+  content: "\fa61";
 }
 .ti-bookmarks:before {
   content: "\ed08";
@@ -2227,6 +2272,9 @@
 .ti-bottle:before {
   content: "\ef0b";
 }
+.ti-bottle-filled:before {
+  content: "\fa89";
+}
 .ti-bottle-off:before {
   content: "\f3c8";
 }
@@ -2248,26 +2296,50 @@
 .ti-box-align-bottom:before {
   content: "\f2a8";
 }
+.ti-box-align-bottom-filled:before {
+  content: "\fa8a";
+}
 .ti-box-align-bottom-left:before {
   content: "\f2ce";
+}
+.ti-box-align-bottom-left-filled:before {
+  content: "\fa8b";
 }
 .ti-box-align-bottom-right:before {
   content: "\f2cf";
 }
+.ti-box-align-bottom-right-filled:before {
+  content: "\fa8c";
+}
 .ti-box-align-left:before {
   content: "\f2a9";
+}
+.ti-box-align-left-filled:before {
+  content: "\fa8d";
 }
 .ti-box-align-right:before {
   content: "\f2aa";
 }
+.ti-box-align-right-filled:before {
+  content: "\fa8e";
+}
 .ti-box-align-top:before {
   content: "\f2ab";
+}
+.ti-box-align-top-filled:before {
+  content: "\fa8f";
 }
 .ti-box-align-top-left:before {
   content: "\f2d0";
 }
+.ti-box-align-top-left-filled:before {
+  content: "\fa90";
+}
 .ti-box-align-top-right:before {
   content: "\f2d1";
+}
+.ti-box-align-top-right-filled:before {
+  content: "\fa91";
 }
 .ti-box-margin:before {
   content: "\ee0b";
@@ -2398,6 +2470,9 @@
 .ti-brand-angular:before {
   content: "\ef6b";
 }
+.ti-brand-ansible:before {
+  content: "\fa70";
+}
 .ti-brand-ao3:before {
   content: "\f5e8";
 }
@@ -2418,6 +2493,12 @@
 }
 .ti-brand-asana:before {
   content: "\edc5";
+}
+.ti-brand-aws:before {
+  content: "\fa4c";
+}
+.ti-brand-azure:before {
+  content: "\fa4d";
 }
 .ti-brand-backbone:before {
   content: "\f325";
@@ -2497,8 +2578,14 @@
 .ti-brand-chrome:before {
   content: "\ec18";
 }
+.ti-brand-cinema-4d:before {
+  content: "\fa71";
+}
 .ti-brand-citymapper:before {
   content: "\f5fc";
+}
+.ti-brand-cloudflare:before {
+  content: "\fa4e";
 }
 .ti-brand-codecov:before {
   content: "\f329";
@@ -2529,6 +2616,9 @@
 }
 .ti-brand-cpp:before {
   content: "\f5fe";
+}
+.ti-brand-craft:before {
+  content: "\fa72";
 }
 .ti-brand-crunchbase:before {
   content: "\f7e3";
@@ -2574,6 +2664,9 @@
 }
 .ti-brand-deviantart:before {
   content: "\ecfb";
+}
+.ti-brand-digg:before {
+  content: "\fa73";
 }
 .ti-brand-dingtalk:before {
   content: "\f5ea";
@@ -2623,6 +2716,9 @@
 .ti-brand-elastic:before {
   content: "\f611";
 }
+.ti-brand-electronic-arts:before {
+  content: "\fa74";
+}
 .ti-brand-ember:before {
   content: "\f497";
 }
@@ -2641,8 +2737,14 @@
 .ti-brand-facebook-filled:before {
   content: "\f7e6";
 }
+.ti-brand-feedly:before {
+  content: "\fa75";
+}
 .ti-brand-figma:before {
   content: "\ec93";
+}
+.ti-brand-filezilla:before {
+  content: "\fa76";
 }
 .ti-brand-finder:before {
   content: "\f218";
@@ -2725,6 +2827,9 @@
 .ti-brand-google-home:before {
   content: "\f601";
 }
+.ti-brand-google-maps:before {
+  content: "\fa4f";
+}
 .ti-brand-google-one:before {
   content: "\f232";
 }
@@ -2761,6 +2866,9 @@
 .ti-brand-headlessui:before {
   content: "\f32d";
 }
+.ti-brand-hexo:before {
+  content: "\fa50";
+}
 .ti-brand-hipchat:before {
   content: "\edcd";
 }
@@ -2776,11 +2884,17 @@
 .ti-brand-intercom:before {
   content: "\f1cf";
 }
+.ti-brand-itch:before {
+  content: "\fa22";
+}
 .ti-brand-javascript:before {
   content: "\ef0c";
 }
 .ti-brand-juejin:before {
   content: "\f7b0";
+}
+.ti-brand-kick:before {
+  content: "\fa23";
 }
 .ti-brand-kickstarter:before {
   content: "\edce";
@@ -2793,6 +2907,12 @@
 }
 .ti-brand-lastfm:before {
   content: "\f001";
+}
+.ti-brand-leetcode:before {
+  content: "\fa51";
+}
+.ti-brand-letterboxd:before {
+  content: "\fa24";
 }
 .ti-brand-line:before {
   content: "\f7e8";
@@ -2895,6 +3015,9 @@
 }
 .ti-brand-nytimes:before {
   content: "\ef8d";
+}
+.ti-brand-oauth:before {
+  content: "\fa52";
 }
 .ti-brand-office:before {
   content: "\f398";
@@ -3004,6 +3127,9 @@
 .ti-brand-revolut:before {
   content: "\f4da";
 }
+.ti-brand-rust:before {
+  content: "\fa53";
+}
 .ti-brand-safari:before {
   content: "\ec23";
 }
@@ -3055,6 +3181,9 @@
 .ti-brand-spacehey:before {
   content: "\f4fc";
 }
+.ti-brand-speedtest:before {
+  content: "\fa77";
+}
 .ti-brand-spotify:before {
   content: "\ed03";
 }
@@ -3066,6 +3195,9 @@
 }
 .ti-brand-steam:before {
   content: "\ed6f";
+}
+.ti-brand-storj:before {
+  content: "\fa54";
 }
 .ti-brand-storybook:before {
   content: "\f332";
@@ -3100,6 +3232,9 @@
 .ti-brand-svelte:before {
   content: "\f0df";
 }
+.ti-brand-swift:before {
+  content: "\fa55";
+}
 .ti-brand-symfony:before {
   content: "\f616";
 }
@@ -3117,6 +3252,9 @@
 }
 .ti-brand-telegram:before {
   content: "\ec26";
+}
+.ti-brand-terraform:before {
+  content: "\fa56";
 }
 .ti-brand-tether:before {
   content: "\f5a3";
@@ -3211,6 +3349,9 @@
 .ti-brand-vk:before {
   content: "\ed72";
 }
+.ti-brand-vlc:before {
+  content: "\fa78";
+}
 .ti-brand-volkswagen:before {
   content: "\f50e";
 }
@@ -3241,6 +3382,9 @@
 .ti-brand-whatsapp:before {
   content: "\ec74";
 }
+.ti-brand-wikipedia:before {
+  content: "\fa79";
+}
 .ti-brand-windows:before {
   content: "\ecd8";
 }
@@ -3255,6 +3399,9 @@
 }
 .ti-brand-wordpress:before {
   content: "\f2d3";
+}
+.ti-brand-xamarin:before {
+  content: "\fa7a";
 }
 .ti-brand-xbox:before {
   content: "\f298";
@@ -3427,6 +3574,9 @@
 .ti-building-monument:before {
   content: "\ed26";
 }
+.ti-building-mosque:before {
+  content: "\fa57";
+}
 .ti-building-pavilion:before {
   content: "\ebf7";
 }
@@ -3595,6 +3745,9 @@
 .ti-camera-exclamation:before {
   content: "\f83a";
 }
+.ti-camera-filled:before {
+  content: "\fa37";
+}
 .ti-camera-heart:before {
   content: "\f83b";
 }
@@ -3636,6 +3789,9 @@
 }
 .ti-camera-x:before {
   content: "\f843";
+}
+.ti-camper:before {
+  content: "\fa25";
 }
 .ti-campfire:before {
   content: "\f5a7";
@@ -3703,8 +3859,14 @@
 .ti-carousel-horizontal:before {
   content: "\f659";
 }
+.ti-carousel-horizontal-filled:before {
+  content: "\fa92";
+}
 .ti-carousel-vertical:before {
   content: "\f65a";
+}
+.ti-carousel-vertical-filled:before {
+  content: "\fa93";
 }
 .ti-carrot:before {
   content: "\f21c";
@@ -4783,6 +4945,9 @@
 .ti-cone-off:before {
   content: "\f3d8";
 }
+.ti-cone-plus:before {
+  content: "\fa94";
+}
 .ti-confetti:before {
   content: "\ee46";
 }
@@ -4972,6 +5137,15 @@
 .ti-csv:before {
   content: "\f791";
 }
+.ti-cube:before {
+  content: "\fa97";
+}
+.ti-cube-off:before {
+  content: "\fa95";
+}
+.ti-cube-plus:before {
+  content: "\fa96";
+}
 .ti-cube-send:before {
   content: "\f61b";
 }
@@ -5067,6 +5241,9 @@
 }
 .ti-currency-hryvnia:before {
   content: "\f372";
+}
+.ti-currency-iranian-rial:before {
+  content: "\fa58";
 }
 .ti-currency-kip:before {
   content: "\f373";
@@ -5200,6 +5377,12 @@
 .ti-cylinder:before {
   content: "\f54c";
 }
+.ti-cylinder-off:before {
+  content: "\fa98";
+}
+.ti-cylinder-plus:before {
+  content: "\fa99";
+}
 .ti-dashboard:before {
   content: "\ea87";
 }
@@ -5253,6 +5436,9 @@
 }
 .ti-database-x:before {
   content: "\fa1b";
+}
+.ti-decimal:before {
+  content: "\fa26";
 }
 .ti-deer:before {
   content: "\f4c5";
@@ -5382,6 +5568,9 @@
 }
 .ti-device-heart-monitor:before {
   content: "\f060";
+}
+.ti-device-heart-monitor-filled:before {
+  content: "\fa38";
 }
 .ti-device-imac:before {
   content: "\f7a7";
@@ -5611,6 +5800,9 @@
 .ti-device-mobile-exclamation:before {
   content: "\f8b4";
 }
+.ti-device-mobile-filled:before {
+  content: "\fa39";
+}
 .ti-device-mobile-heart:before {
   content: "\f8b5";
 }
@@ -5712,6 +5904,9 @@
 }
 .ti-device-tablet-exclamation:before {
   content: "\f8c7";
+}
+.ti-device-tablet-filled:before {
+  content: "\fa3a";
 }
 .ti-device-tablet-heart:before {
   content: "\f8c8";
@@ -5899,8 +6094,20 @@
 .ti-devices-x:before {
   content: "\f8f8";
 }
+.ti-diabolo:before {
+  content: "\fa9c";
+}
+.ti-diabolo-off:before {
+  content: "\fa9a";
+}
+.ti-diabolo-plus:before {
+  content: "\fa9b";
+}
 .ti-dialpad:before {
   content: "\f067";
+}
+.ti-dialpad-filled:before {
+  content: "\fa3b";
 }
 .ti-dialpad-off:before {
   content: "\f114";
@@ -6169,6 +6376,9 @@
 .ti-droplet-x:before {
   content: "\f90b";
 }
+.ti-dual-screen:before {
+  content: "\fa59";
+}
 .ti-e-passport:before {
   content: "\f4df";
 }
@@ -6430,6 +6640,9 @@
 .ti-file-code-2:before {
   content: "\ede8";
 }
+.ti-file-cv:before {
+  content: "\fa5a";
+}
 .ti-file-database:before {
   content: "\f037";
 }
@@ -6552,6 +6765,9 @@
 }
 .ti-file-text:before {
   content: "\eaa2";
+}
+.ti-file-text-ai:before {
+  content: "\fa27";
 }
 .ti-file-time:before {
   content: "\f040";
@@ -6730,6 +6946,9 @@
 .ti-focus-2:before {
   content: "\ebd3";
 }
+.ti-focus-auto:before {
+  content: "\fa62";
+}
 .ti-focus-centered:before {
   content: "\f02a";
 }
@@ -6844,6 +7063,15 @@
 .ti-free-rights:before {
   content: "\efb6";
 }
+.ti-freeze-column:before {
+  content: "\fa63";
+}
+.ti-freeze-row:before {
+  content: "\fa65";
+}
+.ti-freeze-row-column:before {
+  content: "\fa64";
+}
 .ti-fridge:before {
   content: "\f1fa";
 }
@@ -6855,6 +7083,15 @@
 }
 .ti-friends-off:before {
   content: "\f136";
+}
+.ti-frustum:before {
+  content: "\fa9f";
+}
+.ti-frustum-off:before {
+  content: "\fa9d";
+}
+.ti-frustum-plus:before {
+  content: "\fa9e";
 }
 .ti-function:before {
   content: "\f225";
@@ -7159,6 +7396,9 @@
 .ti-haze:before {
   content: "\efaa";
 }
+.ti-hdr:before {
+  content: "\fa7b";
+}
 .ti-heading:before {
   content: "\ee9b";
 }
@@ -7167,6 +7407,9 @@
 }
 .ti-headphones:before {
   content: "\eabd";
+}
+.ti-headphones-filled:before {
+  content: "\fa3c";
 }
 .ti-headphones-off:before {
   content: "\ed1d";
@@ -7231,11 +7474,20 @@
 .ti-help-circle:before {
   content: "\f91d";
 }
+.ti-help-circle-filled:before {
+  content: "\fa3d";
+}
 .ti-help-hexagon:before {
   content: "\f7a8";
 }
+.ti-help-hexagon-filled:before {
+  content: "\fa3e";
+}
 .ti-help-octagon:before {
   content: "\f7a9";
+}
+.ti-help-octagon-filled:before {
+  content: "\fa3f";
 }
 .ti-help-off:before {
   content: "\f3f8";
@@ -7246,11 +7498,29 @@
 .ti-help-square:before {
   content: "\f920";
 }
+.ti-help-square-filled:before {
+  content: "\fa40";
+}
 .ti-help-square-rounded:before {
   content: "\f91f";
 }
+.ti-help-square-rounded-filled:before {
+  content: "\fa41";
+}
 .ti-help-triangle:before {
   content: "\f921";
+}
+.ti-help-triangle-filled:before {
+  content: "\fa42";
+}
+.ti-hemisphere:before {
+  content: "\faa2";
+}
+.ti-hemisphere-off:before {
+  content: "\faa0";
+}
+.ti-hemisphere-plus:before {
+  content: "\faa1";
 }
 .ti-hexagon:before {
   content: "\ec02";
@@ -7402,6 +7672,24 @@
 .ti-hexagon-off:before {
   content: "\ee9c";
 }
+.ti-hexagonal-prism:before {
+  content: "\faa5";
+}
+.ti-hexagonal-prism-off:before {
+  content: "\faa3";
+}
+.ti-hexagonal-prism-plus:before {
+  content: "\faa4";
+}
+.ti-hexagonal-pyramid:before {
+  content: "\faa8";
+}
+.ti-hexagonal-pyramid-off:before {
+  content: "\faa6";
+}
+.ti-hexagonal-pyramid-plus:before {
+  content: "\faa7";
+}
 .ti-hexagons:before {
   content: "\f09d";
 }
@@ -7552,6 +7840,36 @@
 .ti-html:before {
   content: "\f7b1";
 }
+.ti-http-connect:before {
+  content: "\fa28";
+}
+.ti-http-delete:before {
+  content: "\fa29";
+}
+.ti-http-get:before {
+  content: "\fa2a";
+}
+.ti-http-head:before {
+  content: "\fa2b";
+}
+.ti-http-options:before {
+  content: "\fa2c";
+}
+.ti-http-patch:before {
+  content: "\fa2d";
+}
+.ti-http-post:before {
+  content: "\fa2e";
+}
+.ti-http-put:before {
+  content: "\fa2f";
+}
+.ti-http-que:before {
+  content: "\fa5b";
+}
+.ti-http-trace:before {
+  content: "\fa30";
+}
 .ti-ice-cream:before {
   content: "\eac2";
 }
@@ -7612,14 +7930,23 @@
 .ti-info-hexagon:before {
   content: "\f7aa";
 }
+.ti-info-hexagon-filled:before {
+  content: "\fa43";
+}
 .ti-info-octagon:before {
   content: "\f7ab";
+}
+.ti-info-octagon-filled:before {
+  content: "\fa44";
 }
 .ti-info-small:before {
   content: "\f922";
 }
 .ti-info-square:before {
   content: "\eac6";
+}
+.ti-info-square-filled:before {
+  content: "\fa45";
 }
 .ti-info-square-rounded:before {
   content: "\f635";
@@ -7629,6 +7956,9 @@
 }
 .ti-info-triangle:before {
   content: "\f923";
+}
+.ti-info-triangle-filled:before {
+  content: "\fa46";
 }
 .ti-inner-shadow-bottom:before {
   content: "\f520";
@@ -7681,6 +8011,9 @@
 .ti-input-search:before {
   content: "\f2a2";
 }
+.ti-ironing:before {
+  content: "\fa7c";
+}
 .ti-ironing-1:before {
   content: "\f2f4";
 }
@@ -7698,6 +8031,15 @@
 }
 .ti-ironing-steam-off:before {
   content: "\f2f8";
+}
+.ti-irregular-polyhedron:before {
+  content: "\faab";
+}
+.ti-irregular-polyhedron-off:before {
+  content: "\faa9";
+}
+.ti-irregular-polyhedron-plus:before {
+  content: "\faaa";
 }
 .ti-italic:before {
   content: "\eb93";
@@ -7887,6 +8229,9 @@
 }
 .ti-layout-grid-add:before {
   content: "\edb9";
+}
+.ti-layout-grid-remove:before {
+  content: "\fa7d";
 }
 .ti-layout-kanban:before {
   content: "\ec3f";
@@ -8095,6 +8440,9 @@
 .ti-live-view:before {
   content: "\ec6b";
 }
+.ti-load-balancer:before {
+  content: "\fa5c";
+}
 .ti-loader:before {
   content: "\eca3";
 }
@@ -8233,6 +8581,9 @@
 .ti-logout:before {
   content: "\eba8";
 }
+.ti-logout-2:before {
+  content: "\fa7e";
+}
 .ti-lollipop:before {
   content: "\efcc";
 }
@@ -8266,6 +8617,9 @@
 .ti-mail:before {
   content: "\eae5";
 }
+.ti-mail-ai:before {
+  content: "\fa31";
+}
 .ti-mail-bolt:before {
   content: "\f937";
 }
@@ -8293,6 +8647,9 @@
 .ti-mail-fast:before {
   content: "\f069";
 }
+.ti-mail-filled:before {
+  content: "\fa47";
+}
 .ti-mail-forward:before {
   content: "\eeac";
 }
@@ -8307,6 +8664,9 @@
 }
 .ti-mail-opened:before {
   content: "\eae4";
+}
+.ti-mail-opened-filled:before {
+  content: "\fa48";
 }
 .ti-mail-pause:before {
   content: "\f941";
@@ -9253,6 +9613,15 @@
 .ti-octagon-off:before {
   content: "\eeb8";
 }
+.ti-octahedron:before {
+  content: "\faae";
+}
+.ti-octahedron-off:before {
+  content: "\faac";
+}
+.ti-octahedron-plus:before {
+  content: "\faad";
+}
 .ti-old:before {
   content: "\eeb9";
 }
@@ -9451,6 +9820,9 @@
 .ti-phone-check:before {
   content: "\ec05";
 }
+.ti-phone-filled:before {
+  content: "\fa49";
+}
 .ti-phone-incoming:before {
   content: "\eb06";
 }
@@ -9471,6 +9843,9 @@
 }
 .ti-photo:before {
   content: "\eb0a";
+}
+.ti-photo-ai:before {
+  content: "\fa32";
 }
 .ti-photo-bolt:before {
   content: "\f990";
@@ -9498,6 +9873,9 @@
 }
 .ti-photo-exclamation:before {
   content: "\f994";
+}
+.ti-photo-filled:before {
+  content: "\fa4a";
 }
 .ti-photo-heart:before {
   content: "\f361";
@@ -9646,11 +10024,23 @@
 .ti-plant-off:before {
   content: "\f17d";
 }
+.ti-play-basketball:before {
+  content: "\fa66";
+}
 .ti-play-card:before {
   content: "\eebf";
 }
 .ti-play-card-off:before {
   content: "\f17e";
+}
+.ti-play-football:before {
+  content: "\fa67";
+}
+.ti-play-handball:before {
+  content: "\fa68";
+}
+.ti-play-volleyball:before {
+  content: "\fa69";
 }
 .ti-player-eject:before {
   content: "\efbc";
@@ -9847,6 +10237,9 @@
 .ti-polaroid:before {
   content: "\eec2";
 }
+.ti-polaroid-filled:before {
+  content: "\fa4b";
+}
 .ti-polygon:before {
   content: "\efd0";
 }
@@ -9888,6 +10281,15 @@
 }
 .ti-printer-off:before {
   content: "\f184";
+}
+.ti-prism:before {
+  content: "\fab1";
+}
+.ti-prism-off:before {
+  content: "\faaf";
+}
+.ti-prism-plus:before {
+  content: "\fab0";
 }
 .ti-prison:before {
   content: "\ef79";
@@ -9942,6 +10344,9 @@
 }
 .ti-pyramid-off:before {
   content: "\f187";
+}
+.ti-pyramid-plus:before {
+  content: "\fab2";
 }
 .ti-qrcode:before {
   content: "\eb11";
@@ -10057,6 +10462,15 @@
 .ti-rectangle-vertical-filled:before {
   content: "\f69b";
 }
+.ti-rectangular-prism:before {
+  content: "\fab5";
+}
+.ti-rectangular-prism-off:before {
+  content: "\fab3";
+}
+.ti-rectangular-prism-plus:before {
+  content: "\fab4";
+}
 .ti-recycle:before {
   content: "\eb9b";
 }
@@ -10138,8 +10552,59 @@
 .ti-resize:before {
   content: "\eecf";
 }
+.ti-rewind-backward-10:before {
+  content: "\faba";
+}
+.ti-rewind-backward-15:before {
+  content: "\fabb";
+}
+.ti-rewind-backward-20:before {
+  content: "\fabc";
+}
+.ti-rewind-backward-30:before {
+  content: "\fabd";
+}
+.ti-rewind-backward-40:before {
+  content: "\fabe";
+}
+.ti-rewind-backward-5:before {
+  content: "\fabf";
+}
+.ti-rewind-backward-50:before {
+  content: "\fac0";
+}
+.ti-rewind-backward-60:before {
+  content: "\fac1";
+}
+.ti-rewind-forward-10:before {
+  content: "\fac2";
+}
+.ti-rewind-forward-15:before {
+  content: "\fac3";
+}
+.ti-rewind-forward-20:before {
+  content: "\fac4";
+}
+.ti-rewind-forward-30:before {
+  content: "\fac5";
+}
+.ti-rewind-forward-40:before {
+  content: "\fac6";
+}
+.ti-rewind-forward-5:before {
+  content: "\fac7";
+}
+.ti-rewind-forward-50:before {
+  content: "\fac8";
+}
+.ti-rewind-forward-60:before {
+  content: "\fac9";
+}
 .ti-ribbon-health:before {
   content: "\f58e";
+}
+.ti-rings:before {
+  content: "\fa6a";
 }
 .ti-ripple:before {
   content: "\ed82";
@@ -10366,6 +10831,9 @@
 .ti-scooter-electric:before {
   content: "\ecc1";
 }
+.ti-scoreboard:before {
+  content: "\fa6b";
+}
 .ti-screen-share:before {
   content: "\ed18";
 }
@@ -10566,6 +11034,9 @@
 }
 .ti-share-off:before {
   content: "\f1a1";
+}
+.ti-shi-jumping:before {
+  content: "\fa6c";
 }
 .ti-shield:before {
   content: "\eb24";
@@ -10768,6 +11239,9 @@
 .ti-skateboard-off:before {
   content: "\f42b";
 }
+.ti-skateboarding:before {
+  content: "\faca";
+}
 .ti-skull:before {
   content: "\f292";
 }
@@ -10905,6 +11379,15 @@
 }
 .ti-speedboat:before {
   content: "\ed93";
+}
+.ti-sphere:before {
+  content: "\fab8";
+}
+.ti-sphere-off:before {
+  content: "\fab6";
+}
+.ti-sphere-plus:before {
+  content: "\fab7";
 }
 .ti-spider:before {
   content: "\f293";
@@ -11560,6 +12043,9 @@
 .ti-stretching:before {
   content: "\f2db";
 }
+.ti-stretching-2:before {
+  content: "\fa6d";
+}
 .ti-strikethrough:before {
   content: "\eb9e";
 }
@@ -11908,6 +12394,9 @@
 .ti-toilet-paper-off:before {
   content: "\f1b4";
 }
+.ti-toml:before {
+  content: "\fa5d";
+}
 .ti-tool:before {
   content: "\eb40";
 }
@@ -12048,6 +12537,9 @@
 }
 .ti-trash-x-filled:before {
   content: "\f784";
+}
+.ti-treadmill:before {
+  content: "\fa6e";
 }
 .ti-tree:before {
   content: "\ef01";
@@ -12445,6 +12937,9 @@
 .ti-wash-dry-f:before {
   content: "\f2ff";
 }
+.ti-wash-dry-flat:before {
+  content: "\fa7f";
+}
 .ti-wash-dry-hang:before {
   content: "\f300";
 }
@@ -12466,8 +12961,14 @@
 .ti-wash-dryclean-off:before {
   content: "\f323";
 }
+.ti-wash-eco:before {
+  content: "\fa80";
+}
 .ti-wash-gentle:before {
   content: "\f306";
+}
+.ti-wash-hand:before {
+  content: "\fa81";
 }
 .ti-wash-machine:before {
   content: "\f25e";
@@ -12501,6 +13002,9 @@
 }
 .ti-wash-tumble-off:before {
   content: "\f310";
+}
+.ti-waterpolo:before {
+  content: "\fa6f";
 }
 .ti-wave-saw-tool:before {
   content: "\ecd3";
@@ -12693,6 +13197,9 @@
 }
 .ti-xbox-y:before {
   content: "\f2b9";
+}
+.ti-xd:before {
+  content: "\fa33";
 }
 .ti-yin-yang:before {
   content: "\ec35";
@@ -30085,8 +30592,15 @@ body, body input {
   border: 2px solid #1e293b;
   margin-right: 2px;
 }
-:root[data-high-contrast="1"] .form-check {
-  border: 1px solid;
+:root[data-high-contrast="1"] .form-switch input {
+  border: 2px solid;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23777777'/%3e%3c/svg%3e");
+}
+:root[data-high-contrast="1"] .form-check:not(.form-switch) input {
+  border: 2px solid #1e293b;
+}
+:root[data-high-contrast="1"] .form-check:not(.form-switch) input:checked {
+  background-color: #1e293b;
 }
 :root[data-high-contrast="1"] .tox:not([dir="rtl"]) .tox-toolbar__group:not(:last-of-type) {
   border-right: 1px solid #1e293b;
@@ -30497,13 +31011,85 @@ which broke styles of btn-group > .btn-check
  *
  * ---------------------------------------------------------------------
  */
-.debug-panel {
-  font-size: 0.765625rem;
-  z-index: 9999;
-  display: none;
+.datagrid {
+  --tblr-datagrid-padding: 1.5rem;
+  --tblr-datagrid-item-width: 15rem;
+  display: grid;
+  grid-gap: var(--tblr-datagrid-padding);
+  grid-template-columns: repeat(auto-fit, minmax(var(--tblr-datagrid-item-width), 1fr));
 }
-.debug-panel .card-body {
-  height: 300px;
+.datagrid-title {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1rem;
+  color: var(--tblr-muted);
+  margin-bottom: 0.25rem;
+}
+#debug-toolbar {
+  z-index: 9999;
+  outline: none;
+}
+#debug-toolbar .debug-toolbar-badge button {
+  box-shadow: none;
+}
+#debug-toolbar .debug-toolbar-widgets .debug-toolbar-widget.active, #debug-toolbar .debug-toolbar-widgets .debug-toolbar-widget:hover {
+  border-top: 3px solid #fc7962 !important;
+  margin-top: -3px;
+}
+#debug-toolbar .debug-toolbar-widgets .debug-toolbar-widget button {
+  box-shadow: none;
+}
+#debug-toolbar #debug-toolbar-expanded-content {
+  height: 30vh;
+  overflow: auto;
+}
+#debug-toolbar #debug-toolbar-expanded-content #debug-requests-table thead th {
+  position: sticky;
+  top: 0;
+}
+#debug-toolbar #debug-toolbar-expanded-content .category-badge {
+  padding: 5px;
+  border-radius: 25%;
+}
+#debug-toolbar #debug-toolbar-expanded-content .split-panel-h .left-panel {
+  flex: 0 0 33%;
+  border-right: 1px solid #808080;
+  min-width: 100px;
+}
+#debug-toolbar #debug-toolbar-expanded-content .split-panel-h .resize-handle {
+  cursor: col-resize;
+  width: 10px;
+  z-index: 1030;
+  margin-left: -0.5rem;
+  margin-right: -0.25rem;
+}
+@media (min-width: 992px) {
+  body.debug-active:not(.debug-folded) .search_page .search-container {
+    height: calc(100vh - 56px - 20px - 50px);
+  }
+}
+body.debug-active:not(.debug-folded) .tab-pane:not([id^="tab-Ticket_main"]) {
+  margin-bottom: 50px;
+}
+@media (min-width: 992px) {
+  body.debug-active:not(.debug-folded) .itil-object {
+    height: calc(100vh - 187px - 46px);
+  }
+}
+@media (min-width: 992px) {
+  body.debug-active:not(.debug-folded) form.new-itil-object .itil-object {
+    height: calc(100vh - 187px - 5px);
+  }
+}
+@media (min-width: 992px) {
+  body.debug-active:not(.debug-folded).horizontal-layout .itil-object {
+    height: calc(100vh - 257px - 46px);
+  }
+}
+body.debug-active:not(.debug-folded) .search-footer, body.debug-active:not(.debug-folded) .itil-footer {
+  bottom: 46px;
 }
 /*!
  * ---------------------------------------------------------------------
@@ -32456,6 +33042,28 @@ body.horizontal-layout .secondary-bar {
     min-width: 200px;
   }
 }
+.sortable-savedsearches .sortable-placeholder {
+  background: #e7f06367;
+  border: 1px dashed #ccc;
+  padding: 10px;
+  margin: 10px;
+  opacity: 0.5;
+}
+.sortable-savedsearches .grip-savedsearch {
+  cursor: pointer;
+  cursor: grab;
+}
+.sortable-savedsearches .grip-savedsearch:active {
+  cursor: grabbing;
+}
+.sortable-savedsearches .grip-savedsearch:hover::before {
+  content: "";
+  font-family: tabler-icons;
+  font-weight: 900;
+  color: #626976;
+  margin-left: -1rem;
+  width: 1rem;
+}
 /*!
  * ---------------------------------------------------------------------
  *
@@ -33988,6 +34596,13 @@ div.search-input span.search-input-tag-input:last-of-type {
 .timeline-item .timeline-badges .badge .badge a {
   color: inherit;
 }
+.timeline-item .sub-documents {
+  max-width: 820px;
+  min-width: 100%;
+}
+.timeline-item .sub-documents .pswp-horizontal-gallery {
+  flex-wrap: wrap;
+}
 #new-itilobject-form {
   min-width: 65%;
   max-width: 100%;
@@ -35311,7 +35926,7 @@ input.submit:focus:not([disabled]):not(.disabled), .vsubmit:focus:not([disabled]
   padding: 5px;
   width: 420px;
   height: 40vh;
-  right: -5px;
+  right: -25px;
   z-index: 1000;
   margin-top: 20px;
   border-radius: 2px;
@@ -35329,7 +35944,7 @@ input.submit:focus:not([disabled]):not(.disabled), .vsubmit:focus:not([disabled]
   border-width: 0 10px 17.3px 10px;
   border-color: transparent transparent #CCC transparent;
   top: -18px;
-  right: 5px;
+  right: 25px;
   position: absolute;
 }
 #page .faqadd_entries:after, .qtip .faqadd_entries:after, .modal .modal-body .faqadd_entries:after {
@@ -35341,7 +35956,7 @@ input.submit:focus:not([disabled]):not(.disabled), .vsubmit:focus:not([disabled]
   border-width: 0 10px 18.3px 10px;
   border-color: transparent transparent #ffffff transparent;
   top: -16px;
-  right: 5px;
+  right: 25px;
   position: absolute;
 }
 #page .faqadd_block_content, .qtip .faqadd_block_content, .modal .modal-body .faqadd_block_content {

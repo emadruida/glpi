@@ -352,7 +352,7 @@ class SavedSearch extends CommonDBTM implements ExtraVisibilityCriteria
         $this->fields["users_id"]     = Session::getLoginUserID();
         $this->fields["is_private"]   = 1;
         $this->fields["is_recursive"] = 1;
-        $this->fields["entities_id"]  = $_SESSION["glpiactive_entity"];
+        $this->fields["entities_id"]  = Session::getActiveEntity();
     }
 
 
@@ -874,7 +874,37 @@ class SavedSearch extends CommonDBTM implements ExtraVisibilityCriteria
             $searches[$data['id']] = $data;
         }
 
-        return $searches;
+        // get personal order
+        $user               = new User();
+        $personalorderfield = $this->getPersonalOrderField();
+        $ordered            = [];
+
+        $personalorder = [];
+        if ($user->getFromDB(Session::getLoginUserID())) {
+            $personalorder = importArrayFromDB($user->fields[$personalorderfield]);
+        }
+        if (!is_array($personalorder)) {
+            $personalorder = [];
+        }
+
+        // Add on personal order
+        if (count($personalorder)) {
+            foreach ($personalorder as $id) {
+                if (isset($searches[$id])) {
+                    $ordered[$id] = $searches[$id];
+                    unset($searches[$id]);
+                }
+            }
+        }
+
+        // Add unsaved in order
+        if (count($searches)) {
+            foreach ($searches as $id => $val) {
+                $ordered[$id] = $val;
+            }
+        }
+
+        return $ordered;
     }
 
     /**
@@ -1210,7 +1240,7 @@ class SavedSearch extends CommonDBTM implements ExtraVisibilityCriteria
                               $stmt->bind_param('sss', $execution_time, $now, $row['id']);
                               $DB->executeStatement($stmt);
                         }
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         ErrorHandler::getInstance()->handleException($e);
                     }
                 }

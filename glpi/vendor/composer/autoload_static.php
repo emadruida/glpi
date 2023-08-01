@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInita6142019df4a84cae4a38beec1cdd26f
+class ComposerStaticInit1de80ebd1bc340bbad5845e176f0c69a
 {
     public static $files = array (
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
@@ -586,11 +586,26 @@ class ComposerStaticInita6142019df4a84cae4a38beec1cdd26f
         'Glpi\\Csv\\StatCsvExport' => __DIR__ . '/../..' . '/src/Csv/StatCsvExport.php',
         'Glpi\\Dashboard\\Dashboard' => __DIR__ . '/../..' . '/src/Dashboard/Dashboard.php',
         'Glpi\\Dashboard\\Filter' => __DIR__ . '/../..' . '/src/Dashboard/Filter.php',
+        'Glpi\\Dashboard\\Filters\\AbstractFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/AbstractFilter.php',
+        'Glpi\\Dashboard\\Filters\\DatesFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/DatesFilter.php',
+        'Glpi\\Dashboard\\Filters\\DatesModFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/DatesModFilter.php',
+        'Glpi\\Dashboard\\Filters\\GroupTechFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/GroupTechFilter.php',
+        'Glpi\\Dashboard\\Filters\\ItilCategoryFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/ItilCategoryFilter.php',
+        'Glpi\\Dashboard\\Filters\\LocationFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/LocationFilter.php',
+        'Glpi\\Dashboard\\Filters\\ManufacturerFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/ManufacturerFilter.php',
+        'Glpi\\Dashboard\\Filters\\RequestTypeFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/RequestTypeFilter.php',
+        'Glpi\\Dashboard\\Filters\\StateFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/StateFilter.php',
+        'Glpi\\Dashboard\\Filters\\TicketTypeFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/TicketTypeFilter.php',
+        'Glpi\\Dashboard\\Filters\\UserTechFilter' => __DIR__ . '/../..' . '/src/Dashboard/Filters/UserTechFilter.php',
         'Glpi\\Dashboard\\Grid' => __DIR__ . '/../..' . '/src/Dashboard/Grid.php',
         'Glpi\\Dashboard\\Item' => __DIR__ . '/../..' . '/src/Dashboard/Item.php',
         'Glpi\\Dashboard\\Provider' => __DIR__ . '/../..' . '/src/Dashboard/Provider.php',
         'Glpi\\Dashboard\\Right' => __DIR__ . '/../..' . '/src/Dashboard/Right.php',
         'Glpi\\Dashboard\\Widget' => __DIR__ . '/../..' . '/src/Dashboard/Widget.php',
+        'Glpi\\Debug\\Profile' => __DIR__ . '/../..' . '/src/Debug/Profile.php',
+        'Glpi\\Debug\\Profiler' => __DIR__ . '/../..' . '/src/Debug/Profiler.php',
+        'Glpi\\Debug\\ProfilerSection' => __DIR__ . '/../..' . '/src/Debug/ProfilerSection.php',
+        'Glpi\\Debug\\Toolbar' => __DIR__ . '/../..' . '/src/Debug/Toolbar.php',
         'Glpi\\Event' => __DIR__ . '/../..' . '/src/Event.php',
         'Glpi\\Exception\\ForgetPasswordException' => __DIR__ . '/../..' . '/src/Exception/ForgetPasswordException.php',
         'Glpi\\Exception\\PasswordTooWeakException' => __DIR__ . '/../..' . '/src/Exception/PasswordTooWeakException.php',
@@ -2622,10 +2637,10 @@ class ComposerStaticInita6142019df4a84cae4a38beec1cdd26f
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInita6142019df4a84cae4a38beec1cdd26f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInita6142019df4a84cae4a38beec1cdd26f::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInita6142019df4a84cae4a38beec1cdd26f::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInita6142019df4a84cae4a38beec1cdd26f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit1de80ebd1bc340bbad5845e176f0c69a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit1de80ebd1bc340bbad5845e176f0c69a::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit1de80ebd1bc340bbad5845e176f0c69a::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit1de80ebd1bc340bbad5845e176f0c69a::$classMap;
 
         }, null, ClassLoader::class);
     }

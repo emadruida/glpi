@@ -36,7 +36,7 @@
 use Glpi\SocketModel;
 
 // Current version of GLPI
-define('GLPI_VERSION', '10.0.7');
+define('GLPI_VERSION', '10.0.9');
 
 $schema_file = sprintf('%s/install/mysql/glpi-empty.sql', GLPI_ROOT);
 define(
@@ -305,7 +305,7 @@ $CFG_GLPI["dictionnary_types"]            = ['ComputerModel', 'ComputerType', 'M
     'DatabaseInstanceType', SocketModel::class, 'CableType'
 ];
 
-$CFG_GLPI["helpdesk_visible_types"]       = ['Software', 'Appliance', 'Database'];
+$CFG_GLPI["helpdesk_visible_types"]       = ['Software', 'Appliance', 'DatabaseInstance'];
 
 $CFG_GLPI["networkport_types"]            = ['Computer', 'Monitor', 'NetworkEquipment', 'Peripheral',
     'Phone', 'Printer', 'Enclosure', 'PDU', 'Cluster', 'Unmanaged'
@@ -463,7 +463,7 @@ $CFG_GLPI['user_pref_field'] = ['backcreated', 'csv_delimiter', 'date_format',
     'priority_6', 'refresh_views', 'set_default_tech',
     'set_default_requester', 'show_count_on_tabs',
     'show_jobs_at_login', 'task_private', 'task_state',
-    'use_flat_dropdowntree', 'palette', 'page_layout',
+    'use_flat_dropdowntree', 'use_flat_dropdowntree_on_search_result', 'palette', 'page_layout',
     'highcontrast_css', 'default_dashboard_central', 'default_dashboard_assets',
     'default_dashboard_helpdesk', 'default_dashboard_mini_ticket', 'default_central_tab',
     'fold_menu', 'fold_search', 'savedsearches_pinned', 'richtext_layout', 'timeline_order',
@@ -492,7 +492,7 @@ $CFG_GLPI['inventory_lockable_objects'] = ['Computer_Item',  'Item_SoftwareLicen
     'Item_DeviceControl', 'Item_DeviceDrive', 'Item_DeviceFirmware', 'Item_DeviceGeneric', 'Item_DeviceGraphicCard',
     'Item_DeviceHardDrive', 'Item_DeviceMemory', 'Item_DeviceMotherboard', 'Item_DeviceNetworkCard', 'Item_DevicePci',
     'Item_DevicePowerSupply', 'Item_DeviceProcessor', 'Item_DeviceSensor', 'Item_DeviceSimcard', 'Item_DeviceSoundCard',
-    'DatabaseInstance', 'Item_RemoteManagement','Monitor'
+    'DatabaseInstance', 'Item_RemoteManagement','Monitor', 'Domain_Item'
 ];
 
 $CFG_GLPI["kb_types"]              = ['Budget', 'Change', 'Computer',

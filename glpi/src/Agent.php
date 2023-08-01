@@ -320,6 +320,13 @@ class Agent extends CommonDBTM
             'datatype'   => 'text',
         ] + $baseopts;
 
+        $tab[] = [
+            'id'         => 906,
+            'field'      => 'useragent',
+            'name'       => __('Useragent'),
+            'datatype'   => 'text',
+        ] + $baseopts;
+
         return $tab;
     }
 
@@ -684,6 +691,7 @@ class Agent extends CommonDBTM
             $addresses = $this->getAgentURLs();
         }
 
+        $exception = null;
         $response = null;
         foreach ($addresses as $address) {
             $options = [
@@ -706,17 +714,17 @@ class Agent extends CommonDBTM
                 $response = $httpClient->request('GET', $endpoint, []);
                 self::$found_address = $address;
                 break;
-            } catch (\GuzzleHttp\Exception\RequestException $e) {
+            } catch (\GuzzleHttp\Exception\RequestException $exception) {
                 // got an error response, we don't need to try other addresses
                 break;
-            } catch (Exception $e) {
+            } catch (\Throwable $exception) {
                 // many addresses will be incorrect
             }
         }
 
-        if (!$response) {
+        if ($response === null && $exception !== null) {
             // throw last exception on no response
-            throw $e;
+            throw $exception;
         }
 
         return $response;
@@ -737,7 +745,7 @@ class Agent extends CommonDBTM
             ErrorHandler::getInstance()->handleException($e);
             // not authorized
             return ['answer' => __('Not allowed')];
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             // no response
             return ['answer' => __('Unknown')];
         }
@@ -758,7 +766,7 @@ class Agent extends CommonDBTM
             ErrorHandler::getInstance()->handleException($e);
             // not authorized
             return ['answer' => __('Not allowed')];
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             // no response
             return ['answer' => __('Unknown')];
         }

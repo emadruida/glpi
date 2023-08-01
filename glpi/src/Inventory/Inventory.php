@@ -141,7 +141,7 @@ class Inventory
             $data = json_decode($converter->convert($contentdata));
         } else {
             $this->inventory_tmpfile = tempnam(GLPI_INVENTORY_DIR, 'json_');
-            $contentdata = json_encode($data);
+            $contentdata = json_encode($data, JSON_PRETTY_PRINT);
         }
 
         try {
@@ -255,9 +255,8 @@ class Inventory
             $_SESSION['glpiname'] = $_SESSION['glpiinventoryuserrunning'];
         }
 
+        $main_start = microtime(true); //bench
         try {
-            //bench
-            $main_start = microtime(true);
             if (!$DB->inTransaction()) {
                 $DB->beginTransaction();
             }
@@ -350,7 +349,7 @@ class Inventory
                     $DB->commit();
                 }
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $DB->rollback();
             throw $e;
         } finally {

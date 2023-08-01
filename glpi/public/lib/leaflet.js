@@ -19598,7 +19598,7 @@ module.exports = __webpack_require__.p + "leaflet/dist/images/marker-shadow.png"
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Spinner": () => (/* binding */ Spinner)
+/* harmony export */   Spinner: () => (/* binding */ Spinner)
 /* harmony export */ });
 var __assign = (undefined && undefined.__assign) || function () {
     __assign = Object.assign || function(t) {

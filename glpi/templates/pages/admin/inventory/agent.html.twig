@@ -81,7 +81,7 @@
             __('Item link'),
             field_options
         ) }}
-        <input type="hidden" name="items_id" value="{{ items.fields['items_id'] }}">
+        <input type="hidden" name="items_id" value="{{ item.fields['items_id'] }}">
 
         {% set versions %}
             {% set versions_array = call("importArrayFromDB", [versions_field]) %}
@@ -149,7 +149,7 @@
             ) }}
         {% endfor %}
 
-        <h2 class="header">{{ __('Enabled tasks') }}</h2>
+        <h2 class="header">{{ __('Supported tasks') }}*</h2>
 
         {% for modulefield, modulelabel in {
             'use_module_wake_on_lan': __('Wake on LAN'),
@@ -170,5 +170,6 @@
 
         {{ fields.htmlField('', html, modulelabel) }}
         {% endfor %}
+        <i>* {{ __('when reported by GLPI agent via native inventory') }}</i>
     {% endif %}
 {% endblock %}

@@ -3,7 +3,63 @@
 The present file will list all changes made to the project; according to the
 [Keep a Changelog](http://keepachangelog.com/) project.
 
-## [10.0.7] unreleased
+## [10.0.9] unreleased
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### API changes
+
+#### Added
+
+#### Changes
+
+#### Deprecated
+
+#### Removed
+
+
+## [10.0.8] 2023-07-05
+
+### Added
+- Unified Debug bar feature has been added to display debug information in the browser as a replacement and expansion on the previous, individual debug panels.
+
+### Changed
+
+### Deprecated
+
+### Removed
+- Debug panels and the toggle button to show/hide the primary debug panel that was next to the current user's name in the top right corner of the screen have been removed.
+- `debug_tabs` plugin hook
+
+### API changes
+
+#### Added
+- `CommonDBTM::getMessageReferenceEvent()` method that can be overridden to tweak notifications grouping in mail clients.
+
+#### Changes
+
+#### Deprecated
+- `Html::displayDebugInfo()` method no longer has any effect. The functionality was replaced by the new Debug Bar feature.
+- `Hooks::DEBUG_TABS`
+- `$TIMER_DEBUG` global variable.
+- `$DEBUG_SQL` global variable.
+- `$SQL_TOTAL_REQUEST` global variable.
+- `$DEBUG_SQL` global variable.
+- `$CFG_GLPI['debug_sql']` configuration option.
+- `$CFG_GLPI['debug_vars']` configuration option.
+
+- Usage of parameter `$clean` in `AuthLDAP::getObjectByDn()` and `AuthLDAP::getUserByDn()`.
+
+#### Removed
+
+
+## [10.0.7] 2023-04-05
 
 ### Added
 

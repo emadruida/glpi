@@ -428,7 +428,7 @@ class ReservationItem extends CommonDBChild
     {
         global $DB, $CFG_GLPI;
 
-        if (!Session::haveRight(self::$rightname, self::RESERVEANITEM)) {
+        if (!Session::haveRightsOr(self::$rightname, [READ, self::RESERVEANITEM])) {
             return false;
         }
 
@@ -508,11 +508,13 @@ class ReservationItem extends CommonDBChild
             'FROM'            => 'glpi_reservationitems',
             'WHERE'           => [
                 'is_active' => 1
-            ] + getEntitiesRestrictCriteria('glpi_reservationitems', 'entities_id', $_SESSION['glpiactiveentities'])
+            ] + getEntitiesRestrictCriteria('glpi_reservationitems', 'entities_id', $_SESSION['glpiactiveentities'], true)
         ]);
 
         foreach ($iterator as $data) {
-            $values[$data['itemtype']] = $data['itemtype']::getTypeName();
+            if (is_a($data['itemtype'], CommonDBTM::class, true) && $data['itemtype']::canView()) {
+                $values[$data['itemtype']] = $data['itemtype']::getTypeName();
+            }
         }
 
         $iterator = $DB->request([
@@ -539,7 +541,7 @@ class ReservationItem extends CommonDBChild
                 'itemtype'           => 'Peripheral',
                 'is_active'          => 1,
                 'peripheraltypes_id' => ['>', 0]
-            ] + getEntitiesRestrictCriteria('glpi_reservationitems', 'entities_id', $_SESSION['glpiactiveentities']),
+            ] + getEntitiesRestrictCriteria('glpi_reservationitems', 'entities_id', $_SESSION['glpiactiveentities'], true),
             'ORDERBY'   => 'glpi_peripheraltypes.name'
         ]);
 
@@ -552,6 +554,18 @@ class ReservationItem extends CommonDBChild
             'class'               => "form-select",
             'value'               => $_POST['reservation_types'],
             'display_emptychoice' => true,
+        ]);
+
+        echo "</td></tr>";
+
+        // Location dropdown
+        $locrand = mt_rand();
+        echo "<tr class='tab_bg_1'><td><label for='dropdown_locations_id$locrand'>" . __('Item location') . "</label></td><td>";
+        Location::dropdown([
+            // Fill with submitted data if any, otherwise use user's location
+            'value'  => (int)($_POST['locations_id'] ?? User::getById(Session::getLoginUserID())->fields['locations_id'] ?? 0),
+            'rand'   => $locrand,
+            'entity' => $_SESSION['glpiactiveentities'],
         ]);
 
         echo "</td></tr>";
@@ -660,6 +674,13 @@ class ReservationItem extends CommonDBChild
                 }
             }
 
+            // Filter locations if location was provided/submitted
+            if ((int)($_POST['locations_id'] ?? 0) > 0) {
+                $criteria['WHERE'][] = [
+                    'glpi_locations.id' => getSonsOf('glpi_locations', (int) $_POST['locations_id']),
+                ];
+            }
+
             $iterator = $DB->request($criteria);
             foreach ($iterator as $row) {
                 echo "<tr><td>";
@@ -702,7 +723,7 @@ class ReservationItem extends CommonDBChild
                 $ok = true;
             }
         }
-        if ($ok) {
+        if ($ok && Session::haveRight("reservation", self::RESERVEANITEM)) {
             echo "<tr class='tab_bg_1'>";
             echo "<th><i class='fas fa-level-up-alt fa-flip-horizontal fa-lg mx-2'></i></th>";
             echo "<th colspan='" . ($showentity ? "5" : "4") . "'>";
@@ -927,7 +948,7 @@ class ReservationItem extends CommonDBChild
 
         if ($item->getType() == __CLASS__) {
             $tabs = [];
-            if (Session::haveRight("reservation", ReservationItem::RESERVEANITEM)) {
+            if (Session::haveRightsOr("reservation", [READ, ReservationItem::RESERVEANITEM])) {
                 $tabs[1] = Reservation::getTypeName(1);
             }
             if (

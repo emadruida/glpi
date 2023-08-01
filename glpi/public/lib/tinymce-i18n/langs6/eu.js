@@ -1,10 +1,4 @@
-/*!
- * TinyMCE Language Pack
- *
- * Copyright (c) 2022 Ephox Corporation DBA Tiny Technologies, Inc.
- * Licensed under the Tiny commercial license. See https://www.tiny.cloud/legal/
- */
-tinymce.addI18n('eu', {
+tinymce.addI18n("eu", {
     "Redo": "Berregin",
     "Undo": "Desegin",
     "Cut": "Ebaki",
@@ -127,7 +121,7 @@ tinymce.addI18n('eu', {
     "Insert/edit link": "Txertatu/editatu esteka",
     "Text to display": "Bistaratzeko testua",
     "Url": "URLa",
-    "Open link in...": "Ireki lotura hemen...",
+    "Open link in...": "Ireki esteka hemen...",
     "Current window": "Leiho berean",
     "None": "Bat ere ez",
     "New window": "Leiho berria",
@@ -330,7 +324,7 @@ tinymce.addI18n('eu', {
     "People": "Jendea",
     "Animals and Nature": "Animaliak eta natura",
     "Food and Drink": "Janari eta edaria",
-    "Activity": "Ekintza",
+    "Activity": "Jarduera",
     "Travel and Places": "Bidaiak eta lekuak",
     "Objects": "Objektuak",
     "Flags": "Banderak",

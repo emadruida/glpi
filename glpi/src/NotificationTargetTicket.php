@@ -689,10 +689,10 @@ class NotificationTargetTicket extends NotificationTargetCommonITILObject
                 _n('Associated element', 'Associated elements', Session::getPluralNumber()),
                 __('Postal code')
             ),
-            'ticket.item.locationcity'     => sprintf(
+            'ticket.item.locationtown'     => sprintf(
                 __('%1$s: %2$s'),
                 _n('Associated element', 'Associated elements', Session::getPluralNumber()),
-                __('City')
+                __('Town')
             ),
             'ticket.item.locationstate'    => sprintf(
                 __('%1$s: %2$s'),
@@ -722,6 +722,11 @@ class NotificationTargetTicket extends NotificationTargetCommonITILObject
             'ticket.location.latitude'     => __('Latitude'),
             'ticket.location.longitude'    => __('Longitude'),
             'ticket.location.altitude'     => __('Altitude'),
+            'ticket.location.address'      => __('Address'),
+            'ticket.location.postcode'     => __('Postal code'),
+            'ticket.location.town'         => __('Town'),
+            'ticket.location.state'        => _x('location', 'State'),
+            'ticket.location.country'      => __('Country'),
             'ticket.globalvalidation'      => __('Global approval status'),
             'ticket.solution.approval.description'  => __('Solution rejection comment'),
             'ticket.solution.approval.date'         => __('Solution rejection date'),

@@ -136,6 +136,8 @@ class RuleAsset extends Rule
         $criterias['users_id']['type']            = 'dropdown_users';
         $criterias['users_id']['table']           = 'glpi_users';
 
+        $criterias['_tag']['name']            = sprintf('%s > %s', Agent::getTypeName(1), __('Inventory tag'));
+
         $criterias['_locations_id_of_user']['table']     = 'glpi_locations';
         $criterias['_locations_id_of_user']['field']     = 'completename';
         $criterias['_locations_id_of_user']['name']      = __('User location');
@@ -194,6 +196,10 @@ class RuleAsset extends Rule
         $actions['comment']['field']            = 'comment';
         $actions['comment']['name']             = __('Comments');
 
+        $actions['otherserial']['name']              = __('Inventory number');
+        $actions['otherserial']['type']              = 'text';
+        $actions['otherserial']['force_actions']     = ['regex_result'];
+
         return $actions;
     }
 
@@ -202,9 +208,8 @@ class RuleAsset extends Rule
     {
 
         $values = parent::getRights();
-       //TRANS: short for : Business rules for ticket (entity parent)
         $values[self::PARENT] = ['short' => __('Parent business'),
-            'long'  => __('Business rules for ticket (entity parent)')
+            'long'  => __('Business rules (entity parent)')
         ];
 
         return $values;

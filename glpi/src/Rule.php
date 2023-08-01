@@ -1039,7 +1039,7 @@ class Rule extends CommonDBTM
         if ($ID == "") {
             return $this->getEmpty();
         }
-        if ($ret = $this->getFromDB($ID)) {
+        if ($this->getFromDB($ID)) {
             if (
                 $withactions
                 && ($RuleAction = getItemForItemtype($this->ruleactionclass))
@@ -2332,7 +2332,7 @@ class Rule extends CommonDBTM
         return [
             'criterion' => Sanitizer::encodeHtmlSpecialChars(Sanitizer::getVerbatimValue($criterion)),
             'condition' => Sanitizer::encodeHtmlSpecialChars(Sanitizer::getVerbatimValue($condition)),
-            'pattern'   => Sanitizer::encodeHtmlSpecialChars(Sanitizer::getVerbatimValue($pattern)),
+            'pattern'   => Sanitizer::encodeHtmlSpecialChars(Sanitizer::getVerbatimValue($pattern ?? '')),
         ];
     }
 
@@ -3551,8 +3551,6 @@ class Rule extends CommonDBTM
         $input['is_active']   = 0;
         $input['ranking']     = $nextRanking;
         $input['uuid']        = static::getUuid();
-
-        $input = Toolbox::addslashes_deep($input);
 
         return $input;
     }

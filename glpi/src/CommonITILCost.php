@@ -396,16 +396,17 @@ abstract class CommonITILCost extends CommonDBChild
      **/
     public function showForm($ID, array $options = [])
     {
-
-        if (isset($options['parent']) && !empty($options['parent'])) {
-            $item = $options['parent'];
+        if (!($ID > 0) && !isset($options['parent']) || !($options['parent'] instanceof CommonDBTM)) {
+            // parent is mandatory in new item form
+            trigger_error('Parent item must be defined in `$options["parent"]`.', E_USER_WARNING);
+            return false;
         }
 
         if ($ID > 0) {
             $this->check($ID, READ);
         } else {
            // Create item
-            $options[static::$items_id] = $item->getField('id');
+            $options[static::$items_id] = $options['parent']->fields["id"];
             $this->check(-1, CREATE, $options);
             $this->initBasedOnPrevious();
         }
@@ -439,7 +440,10 @@ abstract class CommonITILCost extends CommonDBChild
         echo "<td>" . __('Duration') . "</td>";
         echo "<td>";
         Dropdown::showTimeStamp('actiontime', ['value'           => $this->fields['actiontime'],
-            'addfirstminutes' => true
+            'addfirstminutes'      => true,
+            'min'                  => DAY_TIMESTAMP,
+            'max'                  => DAY_TIMESTAMP * 50,
+            'step'                 => DAY_TIMESTAMP,
         ]);
         echo "</td>";
         echo "<td>" . __('End date') . "</td>";

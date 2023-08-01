@@ -216,7 +216,7 @@ class Auth extends CommonGLPI
             );
 
             return $protocol->login($login, $pass);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->addToError($e->getMessage());
             return false;
         } finally {
@@ -277,23 +277,26 @@ class Auth extends CommonGLPI
 
             $dn = $infos['dn'];
             $this->user_found = $dn != '';
-            if ($this->user_found && @ldap_bind($this->ldap_connection, $dn, $password)) {
-               //Hook to implement to restrict access by checking the ldap directory
+
+            $bind_result = $this->user_found ? @ldap_bind($this->ldap_connection, $dn, $password) : false;
+
+            if ($this->user_found && $bind_result !== false) {
+                //Hook to implement to restrict access by checking the ldap directory
                 if (Plugin::doHookFunction(Hooks::RESTRICT_LDAP_AUTH, $infos)) {
                     return $infos;
                 }
                 $this->addToError(__('User not authorized to connect in GLPI'));
-               //Use is present by has no right to connect because of a plugin
+                //Use is present by has no right to connect because of a plugin
                 return false;
             } else {
-               // Incorrect login
+                // Incorrect login
                 $this->addToError(__('Incorrect username or password'));
-               //Use is not present anymore in the directory!
+                //Use is not present anymore in the directory!
                 return false;
             }
         } else {
             $this->addToError(__('Unable to connect to the LDAP directory'));
-           //Directory is not available
+            //Directory is not available
             return false;
         }
     }
@@ -748,6 +751,7 @@ class Auth extends CommonGLPI
 
        // manage the $login_auth (force the auth source of the user account)
         $this->user->fields["auths_id"] = 0;
+        $authtype = null;
         if ($login_auth == 'local') {
             $authtype = self::DB_GLPI;
             $this->user->fields["authtype"] = self::DB_GLPI;
@@ -760,7 +764,9 @@ class Auth extends CommonGLPI
             } else if ($auth_matches['type'] == 'external') {
                 $authtype = self::EXTERNAL;
             }
-            $this->user->fields['authtype'] = $authtype;
+            if ($authtype !== null) {
+                $this->user->fields['authtype'] = $authtype;
+            }
         }
         if (!$noauto && ($authtype = self::checkAlternateAuthSystems())) {
             if (
@@ -779,6 +785,7 @@ class Auth extends CommonGLPI
                 }
 
                 $ldapservers = [];
+                $ldapservers_status = false;
                //if LDAP enabled too, get user's infos from LDAP
                 if (Toolbox::canUseLdap()) {
                    //User has already authenticated, at least once: it's ldap server if filled
@@ -800,7 +807,6 @@ class Auth extends CommonGLPI
                         }
                     }
 
-                    $ldapservers_status = false;
                     foreach ($ldapservers as $ldap_method) {
                         $ds = AuthLDAP::connectToServer(
                             $ldap_method["host"],
@@ -1024,7 +1030,6 @@ class Auth extends CommonGLPI
                         0,
                         "system",
                         3,
-                        "login",
                         "login",
                         "Connection failed for " . $login_name . " ($ip)"
                     );
@@ -1813,7 +1818,7 @@ class Auth extends CommonGLPI
     /**
      * Display the authentication source dropdown for login form
      */
-    public static function dropdownLogin(bool $display = true)
+    public static function dropdownLogin(bool $display = true, $rand = 1)
     {
         $out = "";
         $elements = self::getLoginAuthMethods();
@@ -1822,7 +1827,7 @@ class Auth extends CommonGLPI
        // show dropdown of login src only when multiple src
         $out .= Dropdown::showFromArray('auth', $elements, [
             'display'   => false,
-            'rand'      => '1',
+            'rand'      => $rand,
             'value'     => $default,
             'width'     => '100%'
         ]);

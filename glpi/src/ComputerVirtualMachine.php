@@ -34,6 +34,7 @@
  */
 
 use Glpi\Application\View\TemplateRenderer;
+use Glpi\Toolbox\Sanitizer;
 
 /**
  * Virtual machine management
@@ -198,7 +199,8 @@ class ComputerVirtualMachine extends CommonDBChild
 
                 $computer = new Computer();
                 foreach ($hosts as $host) {
-                    echo "<tr class='tab_bg_2'>";
+                    $class = $host['is_deleted'] ? "deleted" : "";
+                    echo "<tr class='tab_bg_2 $class' >";
                     echo "<td>";
                     if ($computer->can($host['computers_id'], READ)) {
                         echo "<a href='" . Computer::getFormURLWithID($computer->fields['id']) . "'>";
@@ -397,7 +399,7 @@ class ComputerVirtualMachine extends CommonDBChild
             }
         }
 
-        return $in;
+        return Sanitizer::sanitize($in);
     }
 
 

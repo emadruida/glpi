@@ -155,9 +155,35 @@ class Entity extends CommonTreeDropdown
         ];
     }
 
-    /**
-     * @since 0.84
-     **/
+    public function pre_updateInDB()
+    {
+        global $DB;
+
+        if (($key = array_search('name', $this->updates)) !== false) {
+            /// Check if entity does not exist
+            $iterator = $DB->request([
+                'FROM' => $this->getTable(),
+                'WHERE' => [
+                    'name' => $this->input['name'],
+                    'entities_id' => $this->input['entities_id'],
+                    'id' => ['<>', $this->input['id']]
+                ]
+            ]);
+
+            if (count($iterator)) {
+                //To display a message
+                $this->fields['name'] = $this->oldvalues['name'];
+                unset($this->updates[$key]);
+                unset($this->oldvalues['name']);
+                Session::addMessageAfterRedirect(
+                    __('An entity with that name already exists at the same level.'),
+                    false,
+                    ERROR
+                );
+            }
+        }
+    }
+
     public function pre_deleteItem()
     {
         global $GLPI_CACHE;
@@ -191,6 +217,11 @@ class Entity extends CommonTreeDropdown
         return _n('Entity', 'Entities', $nb);
     }
 
+    public static function canCreate()
+    {
+        // Do not show the create button if no recusive access on current entity
+        return parent::canCreate() && Session::haveRecursiveAccessToEntity(Session::getActiveEntity());
+    }
 
     public function canCreateItem()
     {
@@ -1247,6 +1278,20 @@ class Entity extends CommonTreeDropdown
             'massiveaction'      => false,
             'nosearch'           => true,
             'datatype'           => 'specific'
+        ];
+
+        $tab[] = [
+            'id'                 => '75',
+            'table'              => self::getTable(),
+            'field'              => 'contracts_id_default',
+            'name'               => __('Default contract'),
+            'datatype'           => 'specific',
+            'nosearch'           => true,
+            'additionalfields'   => ['contracts_strategy_default'],
+            'toadd'              => [
+                self::CONFIG_PARENT => __('Inheritance of the parent entity'),
+                self::CONFIG_AUTO   => __('Contract in ticket entity'),
+            ]
         ];
 
         $tab[] = [
@@ -3724,6 +3769,17 @@ class Entity extends CommonTreeDropdown
                     return __('No automatic transfer');
                 }
                 return Dropdown::getDropdownName('glpi_transfers', $values[$field]);
+
+            case 'contracts_id_default':
+                $strategy = $values['contracts_strategy_default'] ?? $values[$field];
+                if ($strategy === self::CONFIG_PARENT) {
+                    return __('Inheritance of the parent entity');
+                }
+                if ($strategy === self::CONFIG_AUTO) {
+                    return __('Contract in ticket entity');
+                }
+
+                return Dropdown::getDropdownName(Contract::getTable(), $values[$field]);
         }
         return parent::getSpecificValueToDisplay($field, $values, $options);
     }
@@ -3972,7 +4028,7 @@ class Entity extends CommonTreeDropdown
      *
      * @return string|null
      */
-    public static function badgeCompletename(string $entity_string = ""): string
+    public static function badgeCompletename(string $entity_string = "", ?string $title = null): string
     {
         // `completename` is expected to be received as it is stored in DB,
         // meaning that `>` separator is not encoded, but `<`, `>` and `&` from self or parent names are encoded.
@@ -3984,7 +4040,9 @@ class Entity extends CommonTreeDropdown
         }
 
         // Construct HTML with special chars encoded.
-        $title = htmlspecialchars(implode(' > ', $names));
+        if ($title === null) {
+            $title = htmlspecialchars(implode(' > ', $names));
+        }
         $breadcrumbs = implode(
             '<i class="fas fa-caret-right mx-1"></i>',
             array_map(

@@ -37,6 +37,7 @@ namespace Glpi\Marketplace;
 
 use CommonGLPI;
 use Config;
+use Glpi\Application\View\TemplateRenderer;
 use Glpi\Marketplace\Api\Plugins as PluginsApi;
 use GLPINetwork;
 use Html;
@@ -733,7 +734,7 @@ HTML;
 
                     // Use "marketplace.download.php" proxy if archive is downloadable from GLPI marketplace plugins API
                     // as this API will refuse to serve the archive if registration key is not set in headers.
-                    $download_url = str_starts_with($plugin_data['installation_url'], GLPI_MARKETPLACE_PLUGINS_API_URI)
+                    $download_url = parse_url($plugin_data['installation_url'], PHP_URL_HOST) === parse_url(GLPI_MARKETPLACE_PLUGINS_API_URI, PHP_URL_HOST)
                         ? $CFG_GLPI['root_doc'] . '/front/marketplace.download.php?key=' . $plugin_key
                         : $plugin_data['installation_url'];
 
@@ -813,11 +814,20 @@ HTML;
                 }
             }
 
-            $buttons .= "<button class='modify_plugin'
-                                 data-action='uninstall_plugin'
-                                 title='" . __s("Uninstall") . "'>
-                    <i class='ti ti-folder-x'></i>
-                </button>";
+            $buttons .= TemplateRenderer::getInstance()->render('components/plugin_uninstall_modal.html.twig', [
+                'plugin_name' => $plugin_inst->getField('name'),
+                'modal_id' => 'uninstallModal' . $plugin_inst->getField('directory'),
+                'open_btn' => '<button data-bs-toggle="modal"
+                                       data-bs-target="#uninstallModal' . $plugin_inst->getField('directory') . '"
+                                       title="' . __s('Uninstall') . '">
+                                   <i class="ti ti-folder-x"></i>
+                               </button>',
+                'uninstall_btn' => '<a href="#" class="btn btn-danger w-100 modify_plugin"
+                                       data-action="uninstall_plugin"
+                                       data-bs-dismiss="modal">
+                                       ' . _x("button", "Uninstall") . '
+                                   </a>',
+            ]);
 
             if (!strlen($error) && $is_actived && $config_page) {
                 $plugin_dir = Plugin::getWebDir($plugin_key, true);

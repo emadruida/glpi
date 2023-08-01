@@ -1127,6 +1127,13 @@ class Ticket extends CommonITILObject
             $input['itilcategories_id_code'] = ITILCategory::getById($cat_id)->fields['code'];
         }
 
+        // Set previous category code, this is needed to let the rule engine
+        // decide if the code was changed
+        $existing_cat_id = $this->fields['itilcategories_id'] ?? 0;
+        if ($existing_cat_id > 0 && $category = ITILCategory::getById($existing_cat_id)) {
+            $this->fields['itilcategories_id_code'] = $category->fields['code'];
+        }
+
        // Set _contract_type for rules
         $input['_contract_types'] = [];
         $contracts_link = Ticket_Contract::getListForItem($this);
@@ -1152,6 +1159,7 @@ class Ticket extends CommonITILObject
         $rules               = new RuleTicketCollection($entid);
         $rule                = $rules->getRuleClass();
         $changes             = [];
+        $unchanged           = [];
         $post_added          = [];
         $tocleanafterrules   = [];
         $usertypes           = [
@@ -1189,6 +1197,14 @@ class Ticket extends CommonITILObject
                 $input_key = '_' . $field . '_' . $t;
                 $deleted_key = $input_key . '_deleted';
                 $deleted_actors = array_key_exists($deleted_key, $input) && is_array($input[$deleted_key]) ? array_column($input[$deleted_key], 'items_id') : [];
+                $tmp_input = $input[$input_key] ?? [];
+                if (!is_array($tmp_input)) {
+                    $tmp_input = [$tmp_input];
+                }
+                $added_actors = array_diff($tmp_input, array_column($actors, $field));
+                if (empty($added_actors) && empty($deleted_actors)) {
+                    $unchanged[] = $input_key;
+                }
                 foreach ($actors as $actor) {
                     if (
                         !isset($input[$input_key])
@@ -1218,8 +1234,9 @@ class Ticket extends CommonITILObject
                 && !array_key_exists($key, $post_added)
             ) {
                 if (
-                    !isset($this->fields[$key])
-                    || ($DB->escape($this->fields[$key]) != $input[$key])
+                    (!isset($this->fields[$key])
+                    || ($DB->escape($this->fields[$key]) != $input[$key]))
+                    && !in_array($key, $unchanged)
                 ) {
                     $changes[] = $key;
                 }
@@ -3204,26 +3221,6 @@ JAVASCRIPT;
             'datatype'           => 'dropdown'
         ];
 
-        $location_so = Location::rawSearchOptionsToAdd();
-        foreach ($location_so as &$so) {
-           //duplicated search options :(
-            switch ($so['id']) {
-                case 3:
-                    $so['id'] = 83;
-                    break;
-                case 91:
-                    $so['id'] = 84;
-                    break;
-                case 92:
-                    $so['id'] = 85;
-                    break;
-                case 93:
-                    $so['id'] = 86;
-                    break;
-            }
-        }
-        $tab = array_merge($tab, $location_so);
-
         $tab = array_merge($tab, $this->getSearchOptionsActors());
 
         $tab[] = [
@@ -3236,7 +3233,7 @@ JAVASCRIPT;
             'table'              => 'glpi_slas',
             'field'              => 'name',
             'linkfield'          => 'slas_id_tto',
-            'name'               => __('SLA') . "&nbsp;" . __('Time to own'),
+            'name'               => __('SLA') . ' ' . __('Time to own'),
             'massiveaction'      => false,
             'datatype'           => 'dropdown',
             'joinparams'         => [
@@ -3250,7 +3247,7 @@ JAVASCRIPT;
             'table'              => 'glpi_slas',
             'field'              => 'name',
             'linkfield'          => 'slas_id_ttr',
-            'name'               => __('SLA') . "&nbsp;" . __('Time to resolve'),
+            'name'               => __('SLA') . ' ' . __('Time to resolve'),
             'massiveaction'      => false,
             'datatype'           => 'dropdown',
             'joinparams'         => [
@@ -3263,7 +3260,7 @@ JAVASCRIPT;
             'id'                 => '32',
             'table'              => 'glpi_slalevels',
             'field'              => 'name',
-            'name'               => __('SLA') . "&nbsp;" . _n('Escalation level', 'Escalation levels', 1),
+            'name'               => __('SLA') . ' ' . _n('Escalation level', 'Escalation levels', 1),
             'massiveaction'      => false,
             'datatype'           => 'dropdown',
             'joinparams'         => [
@@ -3287,7 +3284,7 @@ JAVASCRIPT;
             'table'              => 'glpi_olas',
             'field'              => 'name',
             'linkfield'          => 'olas_id_tto',
-            'name'               => __('OLA') . "&nbsp;" . __('Internal time to own'),
+            'name'               => __('OLA') . ' ' . __('Internal time to own'),
             'massiveaction'      => false,
             'datatype'           => 'dropdown',
             'joinparams'         => [
@@ -3301,7 +3298,7 @@ JAVASCRIPT;
             'table'              => 'glpi_olas',
             'field'              => 'name',
             'linkfield'          => 'olas_id_ttr',
-            'name'               => __('OLA') . "&nbsp;" . __('Internal time to resolve'),
+            'name'               => __('OLA') . ' ' . __('Internal time to resolve'),
             'massiveaction'      => false,
             'datatype'           => 'dropdown',
             'joinparams'         => [
@@ -3314,7 +3311,7 @@ JAVASCRIPT;
             'id'                 => '192',
             'table'              => 'glpi_olalevels',
             'field'              => 'name',
-            'name'               => __('OLA') . "&nbsp;" . _n('Escalation level', 'Escalation levels', 1),
+            'name'               => __('OLA') . ' ' . _n('Escalation level', 'Escalation levels', 1),
             'massiveaction'      => false,
             'datatype'           => 'dropdown',
             'joinparams'         => [
@@ -5124,23 +5121,12 @@ JAVASCRIPT;
     }
 
     /**
-     * Get tickets count
+     * Get central count criteria
      *
-     * @param boolean $foruser  Only for current login user as requester (false by default)
-     * @param boolean $display  il false return html
-     **/
-    public static function showCentralCount(bool $foruser = false, bool $display = true)
+     * @param boolean $foruser Only for current login user as requester or observer (false by default)
+     */
+    private static function showCentralCountCriteria(bool $foruser): array
     {
-        global $DB, $CFG_GLPI;
-
-       // show a tab with count of jobs in the central and give link
-        if (!Session::haveRight(self::$rightname, self::READALL) && !self::canCreate()) {
-            return false;
-        }
-        if (!Session::haveRight(self::$rightname, self::READALL)) {
-            $foruser = true;
-        }
-
         $table = self::getTable();
         $criteria = [
             'SELECT'    => [
@@ -5157,11 +5143,7 @@ JAVASCRIPT;
                 'glpi_tickets_users' => [
                     'ON' => [
                         'glpi_tickets_users' => 'tickets_id',
-                        $table               => 'id', [
-                            'AND' => [
-                                'glpi_tickets_users.type' => CommonITILActor::REQUESTER
-                            ]
-                        ]
+                        $table               => 'id'
                     ]
                 ],
                 'glpi_ticketvalidations' => [
@@ -5186,14 +5168,19 @@ JAVASCRIPT;
                     ]
                 ];
             }
-        }
 
-        if ($foruser) {
-            $ORWHERE = ['OR' => [
-                'glpi_tickets_users.users_id'                => Session::getLoginUserID(),
-                'glpi_tickets.users_id_recipient'            => Session::getLoginUserID(),
-                'glpi_ticketvalidations.users_id_validate'   => Session::getLoginUserID()
-            ]
+            $WHERE = [
+                'OR' => [
+                    'AND' => [
+                        'glpi_tickets_users.users_id' => Session::getLoginUserID(),
+                        'OR' => [
+                            ['glpi_tickets_users.type' => CommonITILActor::REQUESTER],
+                            ['glpi_tickets_users.type' => CommonITILActor::OBSERVER]
+                        ],
+                    ],
+                    'glpi_tickets.users_id_recipient'            => Session::getLoginUserID(),
+                    'glpi_ticketvalidations.users_id_validate'   => Session::getLoginUserID()
+                ]
             ];
 
             if (
@@ -5201,11 +5188,33 @@ JAVASCRIPT;
                 && isset($_SESSION["glpigroups"])
                 && count($_SESSION["glpigroups"])
             ) {
-                $ORWHERE['OR']['glpi_groups_tickets.groups_id'] = $_SESSION['glpigroups'];
+                $WHERE['OR']['glpi_groups_tickets.groups_id'] = $_SESSION['glpigroups'];
             }
-            $criteria['WHERE'][] = $ORWHERE;
+            $criteria['WHERE'][] = $WHERE;
         }
 
+        return $criteria;
+    }
+
+    /**
+     * Get tickets count
+     *
+     * @param boolean $foruser  Only for current login user as requester or observer (false by default)
+     * @param boolean $display  il false return html
+     **/
+    public static function showCentralCount(bool $foruser = false, bool $display = true)
+    {
+        global $DB, $CFG_GLPI;
+
+       // show a tab with count of jobs in the central and give link
+        if (!Session::haveRight(self::$rightname, self::READALL) && !self::canCreate()) {
+            return false;
+        }
+        if (!Session::haveRight(self::$rightname, self::READALL)) {
+            $foruser = true;
+        }
+
+        $criteria = self::showCentralCountCriteria($foruser);
         $deleted_criteria = $criteria;
         $criteria['WHERE']['glpi_tickets.is_deleted'] = 0;
         $deleted_criteria['WHERE']['glpi_tickets.is_deleted'] = 1;
@@ -6445,6 +6454,20 @@ JAVASCRIPT;
         }
         if (count($calendars)) {
             $input['_date_creation_calendars_id'] = $calendars;
+        }
+
+        // add SLA/OLA (for business rules)
+        if (!$this->isNewItem()) {
+            foreach ([SLM::TTR, SLM::TTO] as $slmType) {
+                list($dateField, $slaField) = SLA::getFieldNames($slmType);
+                if (!isset($input[$slaField]) && isset($this->fields[$slaField]) && $this->fields[$slaField] > 0) {
+                    $input[$slaField] = $this->fields[$slaField];
+                }
+                list($dateField, $olaField) = OLA::getFieldNames($slmType);
+                if (!isset($input[$olaField]) && isset($this->fields[$olaField]) && $this->fields[$olaField] > 0) {
+                    $input[$olaField] = $this->fields[$olaField];
+                }
+            }
         }
     }
 

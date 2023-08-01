@@ -570,7 +570,7 @@ class Document extends CommonDBTM
             $link_params = sprintf('&itemtype=%s&items_id=%s', $linked_item->getType(), $linked_item->getID());
         }
 
-        $splitter = explode("/", $this->fields['filename']);
+        $splitter = $this->fields['filename'] !== null ? explode("/", $this->fields['filename']) : [];
 
         if (count($splitter) == 2) {
            // Old documents in EXT/filename
@@ -582,7 +582,7 @@ class Document extends CommonDBTM
 
         $initfileout = $fileout;
 
-        if (Toolbox::strlen($fileout) > $len) {
+        if ($fileout !== null && Toolbox::strlen($fileout) > $len) {
             $fileout = Toolbox::substr($fileout, 0, $len) . "&hellip;";
         }
 
@@ -600,7 +600,7 @@ class Document extends CommonDBTM
                     title=\"" . $initfileout . "\"target='_blank'>";
             $close = "</a>";
         }
-        $splitter = explode("/", $this->fields['filepath']);
+        $splitter = $this->fields['filename'] !== null ? explode("/", $this->fields['filepath']) : [];
 
         if (count($splitter)) {
             $iterator = $DB->request([
@@ -722,6 +722,7 @@ class Document extends CommonDBTM
 
         if (
             $itemtype !== null
+            && is_a($itemtype, CommonDBTM::class, true)
             && $items_id !== null
             && $this->canViewFileFromItem($itemtype, $items_id)
         ) {
@@ -1769,7 +1770,7 @@ class Document extends CommonDBTM
                 return false;
             }
             $etype = exif_imagetype($file);
-            return in_array($etype, [IMAGETYPE_JPEG, IMAGETYPE_GIF, IMAGETYPE_PNG, IMAGETYPE_BMP]);
+            return in_array($etype, [IMAGETYPE_JPEG, IMAGETYPE_GIF, IMAGETYPE_PNG, IMAGETYPE_BMP, IMAGETYPE_WEBP]);
         } else {
             trigger_error(
                 'For security reasons, you should consider using exif PHP extension to properly check images.',
@@ -1778,7 +1779,7 @@ class Document extends CommonDBTM
             $fileinfo = finfo_open(FILEINFO_MIME_TYPE);
             return in_array(
                 finfo_file($fileinfo, $file),
-                ['image/jpeg', 'image/png','image/gif', 'image/bmp']
+                ['image/jpeg', 'image/png','image/gif', 'image/bmp', 'image/webp']
             );
         }
     }

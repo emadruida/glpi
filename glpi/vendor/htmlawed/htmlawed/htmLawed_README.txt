@@ -1,6 +1,6 @@
 /*
-htmLawed_README.txt, 2 July 2022
-htmLawed 1.2.9
+htmLawed_README.txt, 25 May 2023
+htmLawed 1.2.14
 Copyright Santosh Patnaik
 Dual licensed with LGPL 3 and GPL 2+
 A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_utilities/htmLawed
@@ -1052,7 +1052,7 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
 -- 3.4  Attributes -------------------------------------------------o
 
 
-    In its default setting, htmLawed will only permit attributes described in the HTML specifications (including deprecated ones). A list of the attributes and the elements they are allowed in is in section:- #5.2. Using the '$spec' argument, htmLawed can be forced to permit custom, non-standard attributes as well as custom rules for standard attributes (section:- #2.3).
+  In its default setting, htmLawed will only permit attributes described in the HTML specifications (including deprecated ones). A list of the attributes and the elements they are allowed in is in section:- #5.2. Using the '$spec' argument, htmLawed can be forced to permit custom, non-standard attributes as well as custom rules for standard attributes (section:- #2.3).
   
   Custom `data-*` (`data-star`) attributes, where the first three characters of the value of `star` (*) after lower-casing do not equal 'xml', and the value of `star` does not have a colon (:), equal-to (=), newline, solidus (/), space or tab character, or any upper-case A-Z character are allowed in all elements. ARIA, event and microdata attributes like 'aria-live', 'onclick' and 'itemid' are also considered global attributes (section:- #5.2).
 
@@ -1137,7 +1137,7 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
   
   '!' can be put in the list of schemes to disallow all protocols as well as `local` URLs. Thus, with 'href: http, style: !', '<a href="http://cnn.com" style="background-image: url(local.jpg);">CNN</a>' will become '<a href="http://cnn.com" style="background-image: url(denied:local.jpg);">CNN</a>'
 
-  With '$config["safe"] = 1', all URLs are disallowed in the 'style' attribute values.
+  With '$config["safe"] = 1' (section:- #3.6), all URLs are disallowed in the 'style' attribute values, unless a rule for 'style' is explicitly specified in '$config["schemes"]' or '$config["style_pass"]' (section:- #3.4.8) is set to '1'.
 
 
 .. 3.4.4  Absolute & relative URLs in attribute values ............o
@@ -1260,15 +1260,15 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
 
   As such, it is better to set up a CSS file with class declarations, disallow the 'style' attribute, set a '$spec' rule (see section:- #2.3) for 'class' for the 'oneof' or 'match' parameter, and ask writers to make use of the 'class' attribute.
 
+  With '$config["safe"] = 1' (section:- #3.6) , all URLs are disallowed in the 'style' attribute values, unless a rule for 'style' is explicitly specified in '$config["schemes"]' (section:- #3.4.3) or '$config["style_pass"]' is set to '1'.
+
 
 .. 3.4.9  Hook function for tag content ............................o
 
 
-  It is possible to utilize a custom hook function to alter the tag content htmLawed has finalized (i.e., after it has checked/corrected for required attributes, transformed attributes, lower-cased attribute names, etc.).
+  It is possible to utilize a custom hook function to alter the tag content htmLawed has finalized (i.e., after it has checked/corrected for required attributes, transformed attributes, lower-cased attribute names, etc.). The function should have two arguments, the first receiving an element name and the second receiving either '0' (in case of a closing tag) or an array of attribute name-value pairs (opening tag). It should return a string  with full HTM markup, either an opening or a closing tag with element name and any string of attributes.
 
-  When '$config' parameter 'hook_tag' is set to the name of a function, htmLawed (function 'hl_tag()') will pass on the element name, and the `finalized` attribute name-value pairs as array elements to the function. The function, after completing a task such as filtering or tag transformation, will typically return an empty string, the full opening tag string like '<element_name attribute_1_name="attribute_1_value"...>' (for empty elements like 'img' and 'input', the element-closing slash '/' should also be included), etc.
-  
-  Any 'hook_tag' function, since htmLawed version 1.1.11, also receives names of elements in closing tags, such as 'a' in the closing '</a>' tag of the element '<a href="http://cnn.com">CNN</a>'. No other value is passed to the function since a closing tag contains only element names. Typically, the function will return an empty string or a full closing tag (like '</a>'). 
+  When '$config' parameter 'hook_tag' is set to the name of a function or class method, htmLawed (function 'hl_tag()') will pass on the element name, and the `finalized` attribute name-value pairs as array elements to the function. The function, after completing a task such as filtering or tag transformation, will typically return an empty string, the full opening tag string like '<element_name attribute_1_name="attribute_1_value"...>' (for empty elements like 'img' and 'input', the element-closing slash '/' should also be included), etc.
 
   This is a *powerful functionality* that can be exploited for various objectives: consolidate-and-convert inline 'style' attributes to 'class', convert 'embed' elements to 'object', permit only one 'caption' element in a 'table' element, disallow embedding of certain types of media, *inject HTML*, use CSSTidy:- http://csstidy.sourceforge.net to sanitize 'style' attribute values, etc.
 
@@ -1339,7 +1339,9 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
 
     $processed = htmLawed($text, array('safe'=>1, 'deny_attribute'=>'style'));
 
-  Permitting the 'style' attribute brings in risks of `click-jacking`, etc. CSS property values can render a page non-functional or be used to deface it. Except for URLs, dynamic expressions, and some other things, htmLawed does not completely check 'style' values. It does provide ways for the code-developer implementing htmLawed to do such checks through the '$spec' argument, and through the 'hook_tag' parameter (see section:- #3.4.8 for more). Disallowing style completely and relying on CSS classes and stylesheet files is recommended. 
+  With '$config["safe"] = 1', all URLs are disallowed in the 'style' attribute values, unless a rule for 'style' is explicitly specified in '$config["schemes"]' (section:- #3.4.3) or '$config["style_pass"]' (section:- #3.4.8) is set to '1'.
+
+  Permitting the 'style' attribute brings in risks of `click-jacking`, etc. CSS property values can render a page non-functional or be used to deface it. Except for URLs, dynamic expressions, and some other things, htmLawed does not completely check 'style' values. It does provide ways for the code-developer implementing htmLawed to do such checks through the '$spec' argument, and through the 'hook_tag' parameter (see section:- #3.4.8 for more). Disallowing style completely and relying on CSS classes and stylesheet files is recommended.
   
   If a value for a parameter auto-set through 'safe' is still manually provided, then that value can over-ride the auto-set value. E.g., with '$config["safe"] = 1' and '$config["elements"] = "* +script"', 'script', but not 'applet', is allowed. Such over-ride does not occur for 'deny_attribute' (for legacy reason) when comma-separated attribute names are provided as the value for this parameter (section:- #3.4); instead htmLawed will add 'on*' to the value provided for 'deny_attribute'.
 
@@ -1349,7 +1351,7 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
 -- 3.7  Using a hook function --------------------------------------o
 
 
-  If '$config["hook"]' is not set to '0', then htmLawed will allow preliminarily processed input to be altered by a hook function named by '$config["hook"]' before starting the main work (but after handling of characters, entities, HTML comments and 'CDATA' sections -- see code for function 'htmLawed()').
+  If '$config["hook"]' is not set to '0', then htmLawed will allow preliminarily processed input to be altered by a function or class method named by '$config["hook"]' before starting the main work (but after handling of characters, entities, HTML comments and 'CDATA' sections -- see code for function 'htmLawed()'). The function should have three arguments – the processed input string, and the finalized '$config' and '$spec' arrays, in order – and it should return the string after any manipulation.
 
   The hook function also allows one to alter the `finalized` values of '$config' and '$spec'.
 
@@ -1405,6 +1407,16 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
   (The release date for the downloadable package of files containing documentation, demo script, test-cases, etc., besides the 'htmLawed.php' file, may be updated without a change-log entry if the secondary files, but not htmLawed per se, are revised.)
 
   `Version number - Release date. Notes`
+
+  1.2.14 - 25 May 2023. Fixed issue that prevented use of attribute 'srcset' in 'link' and 'source'
+
+  1.2.13 - 1 May 2023. Fixed issues with nesting for 'details' and 'ruby', handling of self-closing tags, handling of multiple values in 'sizes', and '$config["schemes"]' parsing
+
+  1.2.12 - 25 April 2023. Fixed issue that prevented use of attribute 'sizes' in 'img' and 'source'
+
+  1.2.11 - 23 January 2023. Fixes an XSS vulnerability arising from a lack of inspection for the alphabetical HTML entity for colon character in URLs
+
+  1.2.10 - 5 November 2022. Class methods can now be specified as '$config' 'hook' and 'hook_tag' functions; corrects a PHP notice if '$config["schemes"]' mistakenly lacks colons.
 
   1.2.9 - 2 July 2022. Improves parsing of '$config["deny_attribute"]' to permit spaces flanking comma characters and allow references to sets of all ARIA, data-* and event attributes; fixes parsing of '$spec' for data-* attribute rules; now permits use of 'aria*', 'data*', and 'on*' in '$spec'; now covers all named HTML entities of current standard specification (this increased htmLawed code size by ~40%); recognizes that closing tag may be omitted for 'caption', 'optgroup', 'rp', 'rt', and 'tbody' as well; recognizes that 'archive' and 'poster' attribute values can have URLs, which can be multiple; recognizes 'onloadend' as global attribute; renames some internal functions; improved standards-compliance for element nesting.
 
@@ -1570,7 +1582,7 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
 -- 4.10  Acknowledgements ------------------------------------------o
 
 
-  Nicholas Alipaz, Bryan Blakey, Pádraic Brady, Michael Butler, Dac Chartrand, Alexandre Chouinard, Ulf Harnhammer, Gareth Heyes, Hakre, Klaus Leithoff, Lukasz Pilorz, Shelley Powers, Psych0tr1a, Lincoln Russell, Tomas Sykorka, Harro Verton, Edward Yang, and many anonymous users.
+  Nicholas Alipaz, Bryan Blakey, Pádraic Brady, Michael Butler, Dac Chartrand, Alexandre Chouinard, NinCollin, Alexandra Ellwood, Ulf Harnhammer, Gareth Heyes, Hakre, Klaus Leithoff, Hideki Mitsuda, jtojnar, Lukasz Pilorz, Shelley Powers, Psych0tr1a, Lincoln Russell, Tomas Sykorka, Harro Verton, walrusmoose, Edward Yang, and many others.
 
   Thank you!
 
@@ -1716,12 +1728,12 @@ A PHP Labware internal utility - https://bioinformatics.org/phplabware/internal_
   selected - option
   shape - area, a
   size - font, hr^, input, select
-  sizes - link
+  sizes - img, link, source
   span - col, colgroup
   src - audio, embed, iframe, img, input, script, source, track, video
   srcdoc~ - iframe
   srclang~ - track
-  srcset~% - img
+  srcset~% - img, link, source
   standby - object
   start - ol
   step~ - input

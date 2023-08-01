@@ -246,12 +246,14 @@ final class DbUtils
             $table     = str_replace("glpi_", "", $table);
             $prefix    = "";
             $pref2     = NS_GLPI;
+            $is_plugin = false;
 
             $matches = [];
             if (preg_match('/^plugin_([a-z0-9]+)_/', $table, $matches)) {
                 $table  = preg_replace('/^plugin_[a-z0-9]+_/', '', $table);
                 $prefix = "Plugin" . Toolbox::ucfirst($matches[1]);
                 $pref2  = NS_PLUG . ucfirst($matches[1]) . '\\';
+                $is_plugin = true;
             }
 
             if (strstr($table, '_')) {
@@ -279,10 +281,40 @@ final class DbUtils
                     $itemtype = $base_itemtype;
                 }
             }
+
+            // Handle namespaces
             if ($itemtype === null) {
                 $namespaced_itemtype = $this->fixItemtypeCase($pref2 . str_replace('_', '\\', $table));
+
                 if (class_exists($namespaced_itemtype)) {
                     $itemtype = $namespaced_itemtype;
+                } else {
+                    // Handle namespace + db relation
+                    // On the previous step we converted all '_' into '\'
+                    // However some '_' must be kept in case of an item relation
+                    // For example, with the `glpi_namespace1_namespace2_items_filters` table
+                    // the expected itemtype is Glpi\Namespace1\Namespace2\Item_Filter
+                    // NOT Glpi\Namespace1\Namespace2\Item\Filter
+                    // To avoid this, we can revert the last '_' and check if the itemtype exists
+                    $check_alternative = $is_plugin
+                        ? substr_count($table, '_') > 1 // for plugin classes, always keep the first+second namespace levels (GlpiPlugin\\PluginName\\)
+                        : substr_count($table, '_') > 0 // for GLPI classes, always keep the first namespace level (Glpi\\)
+                    ;
+                    if ($check_alternative) {
+                        $last_backslash_position = strrpos($namespaced_itemtype, "\\");
+                        // Replace last '\' into '_'
+                        $alternative_namespaced_itemtype = substr_replace(
+                            $namespaced_itemtype,
+                            '_',
+                            $last_backslash_position,
+                            1
+                        );
+                        $alternative_namespaced_itemtype = $this->fixItemtypeCase($alternative_namespaced_itemtype);
+
+                        if (class_exists($alternative_namespaced_itemtype)) {
+                            $itemtype = $alternative_namespaced_itemtype;
+                        }
+                    }
                 }
             }
 
@@ -899,7 +931,7 @@ final class DbUtils
                 $db_sons = $iterator->current()['sons_cache'];
                 $db_sons = $db_sons !== null ? trim($db_sons) : null;
                 if (!empty($db_sons)) {
-                    $sons = $this->importArrayFromDB($db_sons, true);
+                    $sons = $this->importArrayFromDB($db_sons);
                 }
             }
         }
@@ -1022,7 +1054,7 @@ final class DbUtils
 
                   // Return datas from cache in DB
                     if (!empty($rancestors)) {
-                        $ancestors = array_replace($ancestors, $this->importArrayFromDB($rancestors, true));
+                        $ancestors = array_replace($ancestors, $this->importArrayFromDB($rancestors));
                     } else {
                         $loc_id_found = [];
                      // Recursive solution for table with-cache
@@ -1548,9 +1580,9 @@ final class DbUtils
      * Format a user name
      *
      * @param integer $ID           ID of the user.
-     * @param string  $login        login of the user
-     * @param string  $realname     realname of the user
-     * @param string  $firstname    firstname of the user
+     * @param string|null  $login        login of the user
+     * @param string|null  $realname     realname of the user
+     * @param string|null  $firstname    firstname of the user
      * @param integer $link         include link (only if $link==1) (default =0)
      * @param integer $cut          limit string length (0 = no limit) (default =0)
      * @param boolean $force_config force order and id_visible to use common config (false by default)
@@ -1574,10 +1606,10 @@ final class DbUtils
             $id_visible = $_SESSION["glpiis_ids_visible"];
         }
 
-        if ($realname !== null && strlen($realname) > 0) {
+        if (strlen($realname ?? '') > 0) {
             $formatted = $realname;
 
-            if (strlen($firstname) > 0) {
+            if (strlen($firstname ?? '') > 0) {
                 if ($order == User::FIRSTNAME_BEFORE) {
                     $formatted = $firstname . " " . $formatted;
                 } else {
@@ -1592,12 +1624,12 @@ final class DbUtils
                 $formatted = Toolbox::substr($formatted, 0, $cut) . " ...";
             }
         } else {
-            $formatted = $login;
+            $formatted = $login ?? '';
         }
 
         if (
             $ID > 0
-            && ((strlen($formatted ?? '') == 0) || $id_visible)
+            && ((strlen($formatted) == 0) || $id_visible)
         ) {
             $formatted = sprintf(__('%1$s (%2$s)'), $formatted, $ID);
         }

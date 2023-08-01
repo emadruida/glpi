@@ -71,7 +71,7 @@ class Item_Rack extends CommonDBRelation
 
     public static function displayTabContentForItem(CommonGLPI $item, $tabnum = 1, $withtemplate = 0)
     {
-        self::showItems($item, $withtemplate);
+        self::showItems($item);
         return true;
     }
 
@@ -83,6 +83,39 @@ class Item_Rack extends CommonDBRelation
         $forbidden[] = 'CommonDBConnexity:unaffect';
 
         return $forbidden;
+    }
+
+    public static function processMassiveActionsForOneItemtype(
+        MassiveAction $ma,
+        CommonDBTM $item,
+        array $ids
+    ) {
+        switch ($ma->getAction()) {
+            case 'delete':
+                $input = $ma->getInput();
+                $item_rack = new Item_Rack();
+                foreach ($ids as $id) {
+                    if ($item->can($id, UPDATE, $input)) {
+                        $relation_criteria = [
+                            'itemtype' => $item->getType(),
+                            'items_id' => $item->getID()
+                        ];
+                        if (countElementsInTable(Item_Rack::getTable(), $relation_criteria) > 0) {
+                            if ($item_rack->deleteByCriteria($relation_criteria)) {
+                                $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_OK);
+                            } else {
+                                $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_KO);
+                                $ma->addMessage($item->getErrorMessage(ERROR_ON_ACTION));
+                            }
+                        }
+                    } else {
+                        $ma->itemDone($item->getType(), $id, MassiveAction::ACTION_NORIGHT);
+                        $ma->addMessage($item->getErrorMessage(ERROR_RIGHT));
+                    }
+                }
+                return;
+        }
+        parent::processMassiveActionsForOneItemtype($ma, $item, $ids);
     }
 
     /**

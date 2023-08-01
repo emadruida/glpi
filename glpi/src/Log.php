@@ -527,6 +527,7 @@ class Log extends CommonDBTM
                             if ($data['id_search_option']) { // Recent record - see CommonITILObject::getSearchOptionsActors()
                                 $as = $SEARCHOPTION[$data['id_search_option']]['name'];
                             } else { // Old record
+                                $is = $isr = $isa = $iso = false;
                                 switch ($data['itemtype_link']) {
                                     case 'Group':
                                         $is = 'isGroup';
@@ -538,10 +539,6 @@ class Log extends CommonDBTM
 
                                     case 'Supplier':
                                         $is = 'isSupplier';
-                                        break;
-
-                                    default:
-                                        $is = $isr = $isa = $iso = false;
                                         break;
                                 }
                                 if ($is) {
@@ -578,7 +575,7 @@ class Log extends CommonDBTM
                         $tmp['field']   = NOT_AVAILABLE;
                         if ($linktype_field = explode('#', $data["itemtype_link"])) {
                             $linktype     = $linktype_field[0];
-                            $tmp['field'] = $linktype::getTypeName();
+                            $tmp['field'] = is_a($linktype, CommonGLPI::class, true) ? $linktype::getTypeName() : $linktype;
                         }
                         $tmp['change'] = sprintf(
                             __('%1$s: %2$s'),

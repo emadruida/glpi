@@ -37,6 +37,7 @@
  * Based on cacti plugin system
  */
 
+use Glpi\Application\View\TemplateRenderer;
 use Glpi\Cache\CacheManager;
 use Glpi\Marketplace\Controller as MarketplaceController;
 use Glpi\Marketplace\View as MarketplaceView;
@@ -123,6 +124,20 @@ class Plugin extends CommonDBTM
      * @var string[]
      */
     private static $loaded_plugins = [];
+
+    /**
+     * Store additional infos for each plugins
+     *
+     * @var array
+     */
+    private array $plugins_information = [];
+
+    /**
+     * Store keys of plugins found on filesystem.
+     *
+     * @var array|null
+     */
+    private ?array $filesystem_plugin_keys = null;
 
     public static function getTypeName($nb = 0)
     {
@@ -251,7 +266,9 @@ class Plugin extends CommonDBTM
 
         if ($load_plugins) {
             foreach ($directories_to_load as $directory) {
+                \Glpi\Debug\Profiler::getInstance()->start("{$directory}:init", \Glpi\Debug\Profiler::CATEGORY_PLUGINS);
                 Plugin::load($directory);
+                \Glpi\Debug\Profiler::getInstance()->stop("{$directory}:init");
             }
             // For plugins which require action after all plugin init
             Plugin::doHook(Hooks::POST_INIT);
@@ -458,10 +475,9 @@ class Plugin extends CommonDBTM
      */
     public function checkStates($scan_inactive_and_new_plugins = false, array $excluded_plugins = [])
     {
-
         $directories = [];
 
-       // Add known plugins to the check list
+        // Add known plugins to the check list
         $condition = $scan_inactive_and_new_plugins ? [] : ['state' => self::ACTIVATED];
         $known_plugins = $this->find($condition);
         foreach ($known_plugins as $plugin) {
@@ -469,37 +485,66 @@ class Plugin extends CommonDBTM
         }
 
         if ($scan_inactive_and_new_plugins) {
-           // Add found directories to the check list
-            foreach (PLUGINS_DIRECTORIES as $plugins_directory) {
-                if (!is_dir($plugins_directory)) {
-                    continue;
-                }
-                $directory_handle  = opendir($plugins_directory);
-                while (false !== ($filename = readdir($directory_handle))) {
-                    if (
-                        !in_array($filename, ['.svn', '.', '..'])
-                        && is_dir($plugins_directory . DIRECTORY_SEPARATOR . $filename)
-                    ) {
-                        $directories[] = $filename;
-                    }
-                }
-            }
+            array_push($directories, ...$this->getFilesystemPluginKeys());
         }
 
-       // Prevent duplicated checks
+        // Prevent duplicated checks
         $directories = array_unique($directories);
 
-       // Check all directories from the checklist
+        // Check all directories from the checklist
         foreach ($directories as $directory) {
             if (in_array($directory, $excluded_plugins)) {
                 continue;
             }
-            $this->checkPluginState($directory);
+            $this->checkPluginState($directory, $scan_inactive_and_new_plugins);
         }
 
         self::$plugins_state_checked = true;
     }
 
+    /**
+     * Get information for a given plugin.
+     */
+    private function getPluginInformation(string $plugin_key): ?array
+    {
+        if (!array_key_exists($plugin_key, $this->plugins_information)) {
+            $information = $this->getInformationsFromDirectory($plugin_key);
+            $this->plugins_information[$plugin_key] = !empty($information) ? $information : null;
+        }
+
+        return $this->plugins_information[$plugin_key];
+    }
+
+    /**
+     * Return plugin keys corresponding to directories found in filesystem.
+     */
+    private function getFilesystemPluginKeys(): array
+    {
+        if ($this->filesystem_plugin_keys === null) {
+            $this->filesystem_plugin_keys = [];
+
+            $plugins_directories = new AppendIterator();
+            foreach (PLUGINS_DIRECTORIES as $base_dir) {
+                if (!is_dir($base_dir)) {
+                    continue;
+                }
+                $plugins_directories->append(new DirectoryIterator($base_dir));
+            }
+
+            foreach ($plugins_directories as $plugin_directory) {
+                if (
+                    str_starts_with($plugin_directory->getFilename(), '.') // ignore hidden files
+                    || !is_dir($plugin_directory->getRealPath())
+                ) {
+                    continue;
+                }
+
+                $this->filesystem_plugin_keys[] = $plugin_directory->getFilename();
+            }
+        }
+
+        return $this->filesystem_plugin_keys;
+    }
 
     /**
      * Check plugin state.
@@ -508,16 +553,15 @@ class Plugin extends CommonDBTM
      *
      * return void
      */
-    public function checkPluginState($plugin_key)
+    public function checkPluginState($plugin_key, bool $check_for_replacement = false)
     {
-
         $plugin = new self();
 
-        $informations = $this->getInformationsFromDirectory($plugin_key);
-        $new_specs    = $this->getNewInfoAndDirBasedOnOldName($plugin_key);
-
+        $information      = $this->getPluginInformation($plugin_key) ?? [];
         $is_already_known = $plugin->getFromDBByCrit(['directory' => $plugin_key]);
-        $is_loadable      = !empty($informations);
+        $is_loadable      = !empty($information);
+
+        $new_specs        = $check_for_replacement ? $this->getNewInfoAndDirBasedOnOldName($plugin_key) : null;
         $is_replaced      = $new_specs !== null;
 
         if (!$is_already_known && !$is_loadable) {
@@ -541,7 +585,7 @@ class Plugin extends CommonDBTM
                     [
                         'id'    => $plugin->fields['id'],
                         'state' => self::REPLACED,
-                    ] + $informations
+                    ] + $information
                 );
 
                 $this->unload($plugin_key);
@@ -583,7 +627,7 @@ class Plugin extends CommonDBTM
             // Plugin not known, add it in DB
             $this->add(
                 array_merge(
-                    $informations,
+                    $information,
                     [
                         'state'     => $is_replaced ? self::REPLACED : self::NOTINSTALLED,
                         'directory' => $plugin_key,
@@ -594,12 +638,12 @@ class Plugin extends CommonDBTM
         }
 
         if (
-            $informations['version'] != $plugin->fields['version']
+            $information['version'] != $plugin->fields['version']
             || $plugin_key != $plugin->fields['directory']
         ) {
             // Plugin known version differs from information or plugin has been renamed,
             // update information in database
-            $input              = $informations;
+            $input              = $information;
             $input['id']        = $plugin->fields['id'];
             $input['directory'] = $plugin_key;
             if (!in_array($plugin->fields['state'], [self::ANEW, self::NOTINSTALLED, self::NOTUPDATED])) {
@@ -728,27 +772,18 @@ class Plugin extends CommonDBTM
      *
      * @param string $oldname
      *
-     * @return null|array If a new directory is found, returns an array containing 'directory' and 'informations' keys.
+     * @return null|array If a new directory is found, returns an array containing 'directory' and 'information' keys.
      */
     private function getNewInfoAndDirBasedOnOldName($oldname)
     {
+        foreach ($this->getFilesystemPluginKeys() as $plugin_key) {
+            $information = $this->getPluginInformation($plugin_key);
 
-        $plugins_directories = new DirectoryIterator(GLPI_ROOT . '/plugins');
-        /** @var SplFileInfo $plugin_directory */
-        foreach ($plugins_directories as $plugin_directory) {
-            if (
-                in_array($plugin_directory->getFilename(), ['.svn', '.', '..'])
-                || !is_dir($plugin_directory->getRealPath())
-            ) {
-                continue;
-            }
-
-            $informations = $this->getInformationsFromDirectory($plugin_directory->getFilename());
-            if (array_key_exists('oldname', $informations) && $informations['oldname'] === $oldname) {
-               // Return information if oldname specified in parsed directory matches passed value
+            if (($information['oldname'] ?? null) === $oldname) {
+                // Return information if oldname specified in parsed directory matches passed value
                 return [
-                    'directory'    => $plugin_directory->getFilename(),
-                    'informations' => $informations,
+                    'directory'   => $plugin_key,
+                    'information' => $information,
                 ];
             }
         }
@@ -972,7 +1007,7 @@ class Plugin extends CommonDBTM
                     $this->unload($this->fields['directory']);
 
                     Session::addMessageAfterRedirect(
-                        sprintf(__('Plugin prerequisites are not matching, it cannot be activated.') . ' ' . $msg, $this->fields['name']),
+                        sprintf(__('Plugin %1$s prerequisites are not matching, it cannot be activated.'), $this->fields['name']) . ' ' . $msg,
                         true,
                         ERROR
                     );
@@ -1036,7 +1071,7 @@ class Plugin extends CommonDBTM
                 $this->unload($this->fields['directory']);
 
                 Session::addMessageAfterRedirect(
-                    sprintf(__('Plugin configuration must be done, it cannot be activated.') . ' ' . $msg, $this->fields['name']),
+                    sprintf(__('Plugin %1$s configuration must be done, it cannot be activated.'), $this->fields['name']),
                     true,
                     ERROR
                 );
@@ -1612,10 +1647,12 @@ class Plugin extends CommonDBTM
                     }
 
                     if (isset($tab[$itemtype])) {
+                        \Glpi\Debug\Profiler::getInstance()->start("{$plugin_key}:{$name}", \Glpi\Debug\Profiler::CATEGORY_PLUGINS);
                         self::includeHook($plugin_key);
                         if (is_callable($tab[$itemtype])) {
                             call_user_func($tab[$itemtype], $data);
                         }
+                        \Glpi\Debug\Profiler::getInstance()->stop("{$plugin_key}:{$name}");
                     }
                 }
             }
@@ -1626,10 +1663,12 @@ class Plugin extends CommonDBTM
                         continue;
                     }
 
+                    \Glpi\Debug\Profiler::getInstance()->start("{$plugin_key}:{$name}", \Glpi\Debug\Profiler::CATEGORY_PLUGINS);
                     self::includeHook($plugin_key);
                     if (is_callable($function)) {
                         call_user_func($function, $data);
                     }
+                    \Glpi\Debug\Profiler::getInstance()->stop("{$plugin_key}:{$name}");
                 }
             }
         }
@@ -1848,7 +1887,7 @@ class Plugin extends CommonDBTM
                 // variables used in this function.
                 // For example, if the included files contains a $key variable, it will
                 // replace the $key variable used here.
-                $include_fct = function () use ($plugin_key, $file_path) {
+                $include_fct = function () use ($file_path) {
                     include_once($file_path);
                 };
                 $include_fct();
@@ -2624,8 +2663,8 @@ class Plugin extends CommonDBTM
                                 ['action' => 'install'],
                                 $msg,
                                 ['id' => $ID],
-                                'fa-fw fa-folder-plus fa-2x'
-                            ) . '&nbsp;';
+                                'fa-fw fa-folder-plus fa-2x me-1'
+                            );
                         }
                     } else {
                         $missing = '';
@@ -2643,13 +2682,24 @@ class Plugin extends CommonDBTM
                 if (in_array($state, [self::ACTIVATED, self::NOTUPDATED, self::TOBECONFIGURED, self::NOTACTIVATED], true)) {
                    // Uninstall button for installed plugins
                     if (function_exists("plugin_" . $directory . "_uninstall")) {
-                        $output .= Html::getSimpleForm(
-                            static::getFormURL(),
-                            ['action' => 'uninstall'],
-                            _x('button', 'Uninstall'),
-                            ['id' => $ID],
-                            'fa-fw fa-folder-minus fa-2x'
-                        ) . '&nbsp;';
+                        $output .= TemplateRenderer::getInstance()->render('components/plugin_uninstall_modal.html.twig', [
+                            'plugin_name' => $plugin->getField('name'),
+                            'modal_id' => 'uninstallModal' . $plugin->getField('directory'),
+                            'open_btn' => '<a class="pointer"><span class="fas fa-fw fa-folder-minus fa-2x me-1"
+                                                  data-bs-toggle="modal"
+                                                  data-bs-target="#uninstallModal' . $plugin->getField('directory') . '"
+                                                  title="' . __s("Uninstall") . '">
+                                                  <span class="sr-only">' . __s("Uninstall") . '</span>
+                                              </span></a>',
+                            'uninstall_btn' => Html::getSimpleForm(
+                                static::getFormURL(),
+                                ['action' => 'uninstall'],
+                                _x('button', 'Uninstall'),
+                                ['id' => $ID],
+                                '',
+                                'class="btn btn-danger w-100"'
+                            ),
+                        ]);
                     } else {
                        //TRANS: %s is the list of missing functions
                         $output .= sprintf(
