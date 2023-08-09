@@ -1,44 +1,36 @@
-FROM debian:bullseye-slim
-RUN apt-get -y update && \
-    apt-get -y -q --no-install-recommends install \
-		apache2 \
-		ca-certificates \
-		openssl \
-		php php-mysql \
-		php-curl php-mbstring php-xml php-curl php-gd \
-		php-bz2 php-zip php-intl php-ldap \
-	&& apt-get -y clean
+FROM php:8.2-apache
 
-ENV APACHE_CONFDIR /etc/apache2
-ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
+# Configure PHP extensions for GLPI
+RUN apt-get update && apt-get install -y \
+		libfreetype-dev \
+		libjpeg62-turbo-dev \
+		libpng-dev \
+        libicu-dev \
+        libldap2-dev \
+        libbz2-dev \
+        libzip-dev \
+    && docker-php-ext-install mysqli \
+	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
+	&& docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install intl \
+    && docker-php-ext-install exif \
+    && docker-php-ext-install ldap \
+    && docker-php-ext-install bz2 \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install opcache \
+    && apt-get -y clean
 
+COPY ./conf.d/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
+    && sed -i -E "s/(.*)(session.cookie_httponly =).*/\2 On/g" "$PHP_INI_DIR/php.ini"
+
+# Download GLPI
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
-ENV APACHE_RUN_DIR /var/run/apache2
-ENV APACHE_PID_FILE $APACHE_RUN_DIR/apache2.pid
-ENV APACHE_LOCK_DIR /var/lock/apache2
-ENV APACHE_LOG_DIR /var/log/apache2
-ENV LANG C
+RUN curl -sSLf https://github.com/glpi-project/glpi/releases/download/10.0.9/glpi-10.0.9.tgz | tar -zx \
+	&& chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP glpi
 
-RUN mkdir -p $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR
-
-# make CustomLog (access log) go to stdout instead of files
-# and ErrorLog to stderr
-#RUN find "$APACHE_CONFDIR" -type f -exec sed -ri ' \
-#	s!^(\s*CustomLog)\s+\S+!\1 /proc/self/fd/1!g; \
-#	s!^(\s*ErrorLog)\s+\S+!\1 /proc/self/fd/2!g; \
-#' '{}' ';'
-
-COPY --chown=$APACHE_RUN_USER:$APACHE_RUN_GROUP ./glpi /var/www/html/glpi
-
-COPY ./glpi.conf $APACHE_CONFDIR/sites-available
-
-RUN a2enmod ssl rewrite proxy proxy_http && \
-    a2dissite 000-default && \
-    a2ensite glpi
-
-EXPOSE 80
-
-CMD ["apache2", "-DFOREGROUND"]
-
-
+# Configure Apache
+COPY ./conf.d/glpi.conf $APACHE_CONFDIR/sites-available
+RUN a2enmod rewrite && a2dissite 000-default && a2ensite glpi
