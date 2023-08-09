@@ -1,4 +1,4 @@
-FROM emadruida/php-glpi:main
+FROM emadruida/php-glpi:latest
 
 # Download GLPI
 ENV APACHE_RUN_USER www-data

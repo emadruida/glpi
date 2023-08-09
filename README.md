@@ -1,5 +1,7 @@
 # GLPI Dockerized
 
+[![Docker Image CI](https://github.com/emadruida/glpi/actions/workflows/main.yml/badge.svg)](https://github.com/emadruida/glpi/actions/workflows/main.yml)
+
 Docker container that serves GLPI in its own subdomain on Apache
 
 ## How to use this image
