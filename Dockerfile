@@ -1,10 +1,11 @@
 FROM emadruida/php-glpi:latest
 
 # Download GLPI
+ARG GLPI_VERSION=10.0.9
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
-RUN curl -sSLf https://github.com/glpi-project/glpi/releases/download/10.0.9/glpi-10.0.9.tgz | tar -zx \
-	&& chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP glpi
+RUN curl -sSLf https://github.com/glpi-project/glpi/releases/download/${GLPI_VERSION}/glpi-${GLPI_VERSION}.tgz | tar -zx \
+	&& chown -R ${APACHE_RUN_USER}:${APACHE_RUN_GROUP} glpi
 
 # Configure Apache
 COPY ./conf.d/glpi.conf $APACHE_CONFDIR/sites-available
